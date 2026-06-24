@@ -142,16 +142,23 @@ export interface DailyPuzzleMeta {
   difficulty: Difficulty;
 }
 
-/** Farb-Palette für Regionen */
+/** Verfügbare Farbpaletten */
+export type ColorPalette = 'default' | 'candy' | 'jewel' | 'neon';
+
+/**
+ * Regionfarben als CSS-Custom-Property-Referenzen.
+ * Die eigentlichen Farbwerte werden in globals.css per :root / [data-palette] definiert.
+ * So lässt sich die Palette ohne Re-Render wechseln.
+ */
 export const REGION_COLORS: ReadonlyArray<string> = [
-  'hsl(215, 90%, 60%)',  // Blau
-  'hsl(142, 72%, 50%)',  // Grün
-  'hsl(38,  95%, 58%)',  // Orange
-  'hsl(280, 70%, 65%)',  // Lila
-  'hsl(4,   86%, 62%)',  // Rot
-  'hsl(172, 66%, 50%)',  // Türkis
-  'hsl(60,  90%, 55%)',  // Gelb
-  'hsl(330, 80%, 65%)',  // Pink
-  'hsl(200, 80%, 55%)',  // Hellblau
-  'hsl(100, 65%, 52%)',  // Hellgrün
+  'var(--region-0)',
+  'var(--region-1)',
+  'var(--region-2)',
+  'var(--region-3)',
+  'var(--region-4)',
+  'var(--region-5)',
+  'var(--region-6)',
+  'var(--region-7)',
+  'var(--region-8)',
+  'var(--region-9)',
 ];

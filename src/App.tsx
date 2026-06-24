@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useGame } from './hooks/useGame';
 import { useTimer } from './hooks/useTimer';
 import { useMusic } from './hooks/useMusic';
+import { useBoardSize } from './hooks/useBoardSize';
 import { generatePuzzle } from './engine/generator';
 import { Header } from './components/Header/Header';
 import { GameBoard } from './components/Board/GameBoard';
@@ -18,7 +19,7 @@ import { GameOverModal } from './components/Modals/GameOverModal';
 import { LevelSelectModal } from './components/Modals/LevelSelectModal';
 import { SettingsModal } from './components/Modals/SettingsModal';
 import { useLang } from './i18n/LanguageContext';
-import type { Difficulty } from './types';
+import type { Difficulty, ColorPalette } from './types';
 import './styles/globals.css';
 
 function getInitialDark(): boolean {
@@ -48,6 +49,10 @@ export default function App() {
   const [musicTrilogy, setMusicTrilogy] = useState<number>(() => {
     try { const v = localStorage.getItem('wif-doggy-music-trilogy'); return v !== null ? parseInt(v, 10) : 3; } catch { return 3; }
   });
+  const [colorPalette, setColorPalette] = useState<ColorPalette>(() => {
+    try { return (localStorage.getItem('wif-doggy-palette') as ColorPalette) || 'default'; } catch { return 'default'; }
+  });
+
   const [showDaily, setShowDaily] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
@@ -62,6 +67,15 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     try { localStorage.setItem('wif-doggy-dark', String(darkMode)); } catch { /* ignore */ }
   }, [darkMode]);
+
+  useEffect(() => {
+    if (colorPalette === 'default') {
+      document.documentElement.removeAttribute('data-palette');
+    } else {
+      document.documentElement.setAttribute('data-palette', colorPalette);
+    }
+    try { localStorage.setItem('wif-doggy-palette', colorPalette); } catch { /* ignore */ }
+  }, [colorPalette]);
 
   useEffect(() => {
     try { localStorage.setItem('wif-doggy-countdown', String(countdownEnabled)); } catch { /* ignore */ }
@@ -105,6 +119,9 @@ export default function App() {
     canUndo,
     canRedo,
   } = useGame(initialPuzzle);
+
+  // Dynamische Zellgröße: passt --cell-size an Viewport + Puzzle-Größe an
+  useBoardSize(state.puzzle.size);
 
   useTimer({
     startedAt: state.startedAt,
@@ -323,6 +340,8 @@ export default function App() {
           onSetMusicTrilogy={setMusicTrilogy}
           autoXEnabled={autoXEnabled}
           onToggleAutoX={handleToggleAutoX}
+          colorPalette={colorPalette}
+          onSetColorPalette={setColorPalette}
           onClose={() => setShowSettings(false)}
         />
       )}

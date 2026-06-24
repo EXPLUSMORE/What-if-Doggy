@@ -143,12 +143,23 @@ function gameReducer(state: GameState, action: Action): GameState {
         r.map(c => c.row === row && c.col === col ? { ...c, state: newState, source } : c),
       );
 
-      // Auto-X: Beim Platzieren eines Hundes alle leeren Zellen in
+      // ── Solution-Check VOR Auto-X ────────────────────────────────
+      // Erst prüfen ob der Hund korrekt ist. Falscher Hund:
+      //   • kein Auto-X (Zeile/Spalte/Region bleibt offen)
+      //   • Zelle wird als Konflikt markiert (roter Rahmen + Shake)
+      //   • Strafe: Knochen/Leben-Abzug
+      const isPlacingDog = action.type === 'DOUBLE_CLICK_CELL'
+        && newState === 'dog'
+        && !state.whatIfMode;
+      const isWrongDog = isPlacingDog && !state.puzzle.solution[row][col];
+
+      // Auto-X: Beim Platzieren eines RICHTIGEN Hundes alle leeren Zellen in
       // gleicher Zeile, Spalte, farbiger Region UND diagonal-angrenzende Zellen
       // automatisch markieren (wenn autoX-Modus aktiv).
+      // Bei falschem Hund wird Auto-X NICHT angewendet.
       // Alle Auto-Züge landen im selben History-Eintrag → ein einziges Undo.
       const autoMoves: Move[] = [];
-      if (action.type === 'DOUBLE_CLICK_CELL' && newState === 'dog' && action.autoX) {
+      if (action.type === 'DOUBLE_CLICK_CELL' && newState === 'dog' && action.autoX && !isWrongDog) {
         const regionId = state.puzzle.regionMap[row][col];
         newGrid = newGrid.map(r =>
           r.map(c => {
@@ -172,17 +183,20 @@ function gameReducer(state: GameState, action: Action): GameState {
         );
       }
 
-      const resolvedGrid = applyConflicts(newGrid, state.puzzle);
+      let resolvedGrid = applyConflicts(newGrid, state.puzzle);
 
-      const isPlacingDog = action.type === 'DOUBLE_CLICK_CELL'
-        && newState === 'dog'
-        && !state.whatIfMode;
-      const hasConflict = isPlacingDog && resolvedGrid[row][col].conflict;
+      // Falscher Hund: Zelle zusätzlich als Konflikt markieren → roter Rahmen + Shake
+      // (unabhängig davon ob Constraint-Konflikte vorliegen)
+      if (isWrongDog) {
+        resolvedGrid = resolvedGrid.map(r =>
+          r.map(c => c.row === row && c.col === col ? { ...c, conflict: true } : c),
+        );
+      }
 
       let lives = state.lives;
       let bones = state.bones;
       let gameOver: boolean = state.gameOver;
-      if (hasConflict) {
+      if (isWrongDog) {
         ({ lives, bones, gameOver } = applyError(lives, bones));
       }
 

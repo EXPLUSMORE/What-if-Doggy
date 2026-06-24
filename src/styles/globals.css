@@ -31,6 +31,60 @@
   --transition:   150ms ease;
 
   color-scheme: light dark;
+
+  /* ── Regionfarben – Standard-Palette ──────────────────────── */
+  --region-0: hsl(215, 90%, 60%);   /* Blau      */
+  --region-1: hsl(142, 72%, 50%);   /* Grün      */
+  --region-2: hsl(38,  95%, 58%);   /* Orange    */
+  --region-3: hsl(280, 70%, 65%);   /* Lila      */
+  --region-4: hsl(4,   86%, 62%);   /* Rot       */
+  --region-5: hsl(172, 66%, 50%);   /* Türkis    */
+  --region-6: hsl(60,  90%, 55%);   /* Gelb      */
+  --region-7: hsl(330, 80%, 65%);   /* Pink      */
+  --region-8: hsl(200, 80%, 55%);   /* Hellblau  */
+  --region-9: hsl(100, 65%, 52%);   /* Hellgrün  */
+}
+
+/* ── Candy Pop ─────────────────────────────────────────────── */
+[data-palette="candy"] {
+  --region-0: #FF6B6B;   /* Korallrot  */
+  --region-1: #6BCB77;   /* Mintgrün   */
+  --region-2: #FF9F1C;   /* Apfelsine  */
+  --region-3: #A855F7;   /* Lila       */
+  --region-4: #FF85C2;   /* Bubblegum  */
+  --region-5: #2EC4B6;   /* Teal       */
+  --region-6: #FFD93D;   /* Bananengelb*/
+  --region-7: #4D96FF;   /* Blauberry  */
+  --region-8: #FF6633;   /* Mandarinen */
+  --region-9: #00CC88;   /* Spearmint  */
+}
+
+/* ── Jewel Pastel ──────────────────────────────────────────── */
+[data-palette="jewel"] {
+  --region-0: #A8C8E8;   /* Saphir pastel   */
+  --region-1: #A0E5C5;   /* Smaragd pastel  */
+  --region-2: #FAD5A8;   /* Bernstein pastel*/
+  --region-3: #C8A8E0;   /* Amethyst pastel */
+  --region-4: #F5A8A8;   /* Rubin pastel    */
+  --region-5: #A0DDD5;   /* Malachit pastel */
+  --region-6: #FBF0A0;   /* Topas pastel    */
+  --region-7: #F5A8D5;   /* Fuchsia pastel  */
+  --region-8: #B0D4F5;   /* Aquamarin past. */
+  --region-9: #F5C5A8;   /* Koralle pastel  */
+}
+
+/* ── Neon Night ────────────────────────────────────────────── */
+[data-palette="neon"] {
+  --region-0: #7B8BFF;   /* Neon-Blau    */
+  --region-1: #45E5B4;   /* Neon-Mint    */
+  --region-2: #FF9F45;   /* Neon-Orange  */
+  --region-3: #D45AFF;   /* Neon-Lila    */
+  --region-4: #FF6B6B;   /* Neon-Rot     */
+  --region-5: #45C5FF;   /* Neon-Cyan    */
+  --region-6: #FFE45A;   /* Neon-Gelb    */
+  --region-7: #FF6B9D;   /* Neon-Pink    */
+  --region-8: #00E5CC;   /* Neon-Türkis  */
+  --region-9: #AAFF45;   /* Neon-Grün    */
 }
 
 /* Dark mode via system preference */
@@ -693,66 +747,127 @@ body {
 /* ── Mobile Responsive (≤ 520px) ───────────────────────────── */
 @media (max-width: 520px) {
 
-  /* Kleinere Zellen damit auch 10×10 passt */
+  /* --cell-size, --cell-gap, --border-thick werden vom useBoardSize-Hook
+     via JS gesetzt (inline style auf :root) – folgende Werte sind Fallback
+     für den ersten Render-Frame bevor JS läuft: */
   :root {
-    --cell-size: clamp(28px, 8.5vw, 48px);
-    --cell-gap:  1px;
+    --cell-size:    clamp(24px, 8vw, 48px);
+    --cell-gap:     1px;
     --border-thick: 2px;
   }
 
-  /* Root: weniger Seitenabstand */
+  /* Root: weniger Seitenabstand, sicherer Bereich für Notch/Home-Indicator */
   #root {
-    padding-left:  calc(.5rem + env(safe-area-inset-left,  0px));
-    padding-right: calc(.5rem + env(safe-area-inset-right, 0px));
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    padding-left:   calc(.5rem + env(safe-area-inset-left,  0px));
+    padding-right:  calc(.5rem + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(1rem  + env(safe-area-inset-bottom, 0px));
+    padding-top:    calc(.25rem + env(safe-area-inset-top, 0px));
   }
 
-  /* Header: meta-Zeile darf umbrechen */
+  /* Header-Titel kompakter */
+  .header__title-dog  { font-size: 1.2rem; }
+  .header__title-name { font-size: 1.2rem; }
+  .header__title-sub  { font-size: .7rem; }
+  .header { padding: .4rem 0 .2rem; }
+
+  /* Header: meta-Zeile immer zentriert, erlaubt Umbruch auf sehr schmalen Screens */
   .header__meta {
     flex-wrap: wrap;
-    gap: .3rem;
+    gap: .25rem;
     justify-content: center;
   }
 
   /* Stat-Pills kleiner */
-  .header__stat-pill { padding: 3px 7px; }
-  .header__life-icon { font-size: 1rem; }
-  .header__bone-icon { font-size: .85rem; }
-  .header__stat-label { font-size: .6rem; }
+  .header__stat-pill  { padding: 3px 6px; }
+  .header__life-icon  { font-size: 1rem; }
+  .header__bone-icon  { font-size: .85rem; }
+  .header__stat-label { font-size: .58rem; }
 
   /* Level-Timer kompakter auf Mobile */
   .header__level-time { font-size: .75rem; }
-
-  /* Top/Bottom-Controls: kein Umbrechen nötig da nur Icons */
-  .controls--top  { flex-wrap: nowrap; }
-  .controls--bottom { flex-wrap: nowrap; }
-
-  /* Icon-only: Label ausblenden, nur Icon zeigen */
-  .btn__label { display: none; }
-  .btn__icon  { font-size: 1.2em; line-height: 1; }
-
-  /* Buttons kompakter – quadratischer Tap-Target */
-  .controls--top .btn--pill,
-  .controls--bottom .btn--pill {
-    padding: .5em .65em;
-    min-width: 2.4rem;
-    justify-content: center;
-  }
 
   /* Difficulty-Button: kurze Version auf Mobile */
   .diff-label--full  { display: none; }
   .diff-label--short { display: inline; }
 
-  /* Touch-Targets: mindestens 40px Höhe für alle Buttons */
-  .btn { min-height: 40px; }
+  /* Settings-Button kompakter */
+  .header__meta-btn { font-size: .75rem; padding: .3em .55em; min-width: 2rem; }
+  .header__diff-btn { font-size: .7rem; padding: .2em .55em; }
+
+  /* ── Controls ── */
+  /* Icon-only: Label ausblenden, nur Icon zeigen */
+  .btn__label { display: none; }
+  .btn__icon  { font-size: 1.15em; line-height: 1; }
+
+  /* Top-Controls: alle Icons in einer Zeile, bei Überlauf horizontal scrollbar */
+  .controls--top {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: center;
+    gap: .3rem;
+    padding: .3rem .25rem;
+  }
+  .controls--top::-webkit-scrollbar { display: none; }
+
+  /* Bottom-Controls: immer einzeilig */
+  .controls--bottom { flex-wrap: nowrap; gap: .3rem; }
+
+  /* Pill-Buttons: quadratischeres Tap-Target */
+  .controls--top .btn--pill,
+  .controls--bottom .btn--pill {
+    padding: .45em .6em;
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Touch-Targets: mindestens 40px */
+  .btn { min-height: 38px; }
 
   /* Board-Wrapper: engerer Gap */
-  .board-wrapper { gap: .6rem; }
+  .board-wrapper { gap: .45rem; }
 
-  /* Modal: weniger innen-Padding */
-  .modal {
-    padding: 1.5rem 1.25rem;
+  /* Banner: kompakter */
+  .whatif-banner,
+  .generating-banner {
+    font-size: .8rem;
+    padding: .35rem .75rem;
   }
+
+  /* Modal: weniger Padding */
+  .modal { padding: 1.25rem 1rem; }
+  .modal__title { font-size: 1.25rem; }
+}
+
+/* ── Sehr kleine Displays (≤ 375px / iPhone SE) ────────────── */
+@media (max-width: 375px) {
+  /* Noch kompaktere Header-Elemente */
+  .header__stat-pill  { padding: 2px 5px; }
+  .header__life-icon  { font-size: .9rem; }
+  .header__bone-icon  { font-size: .75rem; }
+  .header__title-dog  { font-size: 1rem; }
+  .header__title-name { font-size: 1rem; }
+
+  .controls--top .btn--pill,
+  .controls--bottom .btn--pill {
+    padding: .4em .5em;
+    min-width: 2rem;
+    min-height: 2rem;
+    font-size: .8rem;
+  }
+}
+
+/* ── Landscape auf kleinen Phones ─────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Im Querformat: Header ganz kompakt, Board passt in Höhe */
+  .header--stacked { gap: .15rem; }
+  .header__top { display: none; } /* Titel ausblenden → mehr Platz für Board */
+  #root { padding-top: .15rem; padding-bottom: .5rem; }
+  .board-wrapper { gap: .3rem; }
+  .controls--top, .controls--bottom { padding: .15rem 0; }
 }
 
 /* ── Level Select Modal ─────────────────────────────────────── */

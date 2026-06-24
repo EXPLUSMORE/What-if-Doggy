@@ -71,6 +71,23 @@ Vollständiges webbasiertes Logikspiel (ähnlich LinkedIn Queens). Spieler platz
 - `LivesDisplay.tsx` obsolet – Leben/Knochen direkt im Header
 - `.btn--pill`: `border-radius: 99px`, kein sichtbarer Border
 
+### Letzte Änderungen
+
+- **Wrong-Dog-Feedback** `useGame.ts`: Solution-Check VOR Auto-X. Falscher Hund → `conflict: true` erzwungen (roter Rahmen + Shake), kein Auto-X, sofortiger Knochen/Leben-Abzug.
+- **Mobiles Layout** `useBoardSize.ts` (neuer Hook): Berechnet `--cell-size`, `--cell-gap`, `--border-thick` dynamisch aus Viewport + Puzzle-Größe; reagiert auf `resize`.
+- **Farbpaletten** `types.ts` + `globals.css` + `SettingsModal.tsx`: 3 Paletten (Candy Pop, Jewel Pastel, Neon Night) via `data-palette`-Attribut auf `:root`; Picker in Settings.
+- **Integrationstests** `game.test.tsx`: Komplett neu geschrieben mit korrektem `doubleClickCell` für Hunde; 5 neue Solution-Check-Tests.
+- **TypeScript** kompiliert sauber (`npx tsc --noEmit` = 0 Fehler).
+
+### Ausstehender Git-Commit (lokal ausführen)
+
+```bash
+cd "What if Doggy"
+git add -A
+git commit -m "feat: Wrong-dog feedback + mobile layout + 3 color palettes"
+git push
+```
+
 ### 🔲 Noch ausstehend
 
 Nichts — das Projekt ist vollständig. Nach `npm install` ist alles startbereit.

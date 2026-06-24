@@ -11,6 +11,7 @@ const TIMER_OPTIONS: { label: string; seconds: number }[] = [
 // ============================================================
 
 import { useLang } from '../../i18n/LanguageContext';
+import type { ColorPalette } from '../../types';
 
 interface SettingsModalProps {
   darkMode: boolean;
@@ -25,6 +26,8 @@ interface SettingsModalProps {
   onSetMusicTrilogy: (idx: number) => void;
   autoXEnabled: boolean;
   onToggleAutoX: () => void;
+  colorPalette: ColorPalette;
+  onSetColorPalette: (p: ColorPalette) => void;
   onClose: () => void;
 }
 
@@ -97,6 +100,13 @@ function SectionHead({ label }: { label: string }) {
   );
 }
 
+const PALETTES: { id: string; swatches: string[] }[] = [
+  { id: 'default', swatches: ['hsl(215,90%,60%)', 'hsl(142,72%,50%)', 'hsl(38,95%,58%)', 'hsl(4,86%,62%)'] },
+  { id: 'candy',   swatches: ['#FF6B6B', '#6BCB77', '#FF9F1C', '#4D96FF'] },
+  { id: 'jewel',   swatches: ['#A8C8E8', '#A0E5C5', '#C8A8E0', '#F5A8A8'] },
+  { id: 'neon',    swatches: ['#7B8BFF', '#45E5B4', '#FF9F45', '#FF6B9D'] },
+];
+
 export function SettingsModal({
   darkMode,
   onToggleDark,
@@ -110,6 +120,8 @@ export function SettingsModal({
   onSetMusicTrilogy,
   autoXEnabled,
   onToggleAutoX,
+  colorPalette,
+  onSetColorPalette,
   onClose,
 }: SettingsModalProps) {
   const { lang, t, toggleLang } = useLang();
@@ -156,6 +168,52 @@ export function SettingsModal({
           >
             {lang === 'de' ? 'DE → EN' : 'EN → DE'}
           </button>
+        </div>
+
+        {/* ── Farbpalette ── */}
+        <SectionHead label={t.settings.sectionPalette} />
+        <div style={{ padding: '.5rem 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {PALETTES.map(p => {
+              const active = colorPalette === p.id;
+              const label = (t.settings.palette as Record<string, string>)[p.id] ?? p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onSetColorPalette(p.id as ColorPalette)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '.45rem .75rem',
+                    borderRadius: 99,
+                    border: active ? '2px solid var(--accent)' : '2px solid var(--border)',
+                    background: active ? 'var(--accent)' : 'var(--surface)',
+                    color: active ? '#fff' : 'var(--text)',
+                    cursor: 'pointer',
+                    fontSize: '.825rem',
+                    fontWeight: active ? 600 : 400,
+                    transition: 'all 150ms',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                    {p.swatches.map((c, i) => (
+                      <span key={i} style={{
+                        width: 14, height: 14,
+                        borderRadius: '50%',
+                        background: c,
+                        display: 'inline-block',
+                        border: '1px solid rgba(0,0,0,.12)',
+                      }} />
+                    ))}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Kampagne ── */}
