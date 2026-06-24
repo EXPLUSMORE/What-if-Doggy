@@ -1,0 +1,75 @@
+name: CI / Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "Listing ./dist"
+          if [ -d "./dist" ]; then
+            ls -la ./dist
+          else
+            echo "dist not found — build likely failed"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check GitHub Pages enabled
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              const res = await github.rest.repos.getPages({ owner: context.repo.owner, repo: context.repo.repo });
+              core.info(`Pages status: ${res.data.status || 'unknown'}`);
+            } catch (err) {
+              core.setFailed(`GitHub Pages is not enabled or API not accessible: ${err.message}\nEnable Pages: https://github.com/${context.repo.owner}/${context.repo.repo}/settings/pages`);
+            }
+
+      - name: Debug workspace (optional)
+        run: |
+          echo "Workspace contents:"
+          ls -la $GITHUB_WORKSPACE || true
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
