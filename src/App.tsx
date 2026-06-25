@@ -38,7 +38,7 @@ export default function App() {
     try { const v = localStorage.getItem('wif-doggy-countdown'); return v === null ? true : v === 'true'; } catch { return true; }
   });
   const [musicEnabled, setMusicEnabled] = useState<boolean>(() => {
-    try { const v = localStorage.getItem('wif-doggy-music'); return v === null ? true : v === 'true'; } catch { return true; }
+    try { const v = localStorage.getItem('wif-doggy-music'); return v === null ? false : v === 'true'; } catch { return false; }
   });
   const [autoXEnabled, setAutoXEnabled] = useState<boolean>(() => {
     try { const v = localStorage.getItem('wif-doggy-autox'); return v === null ? true : v === 'true'; } catch { return true; }
@@ -47,7 +47,7 @@ export default function App() {
     try { const v = localStorage.getItem('wif-doggy-timer-duration-v2'); return v ? parseInt(v, 10) : 120; } catch { return 120; }
   });
   const [musicTrilogy, setMusicTrilogy] = useState<number>(() => {
-    try { const v = localStorage.getItem('wif-doggy-music-trilogy'); return v !== null ? parseInt(v, 10) : 3; } catch { return 3; }
+    try { const v = localStorage.getItem('wif-doggy-music-trilogy'); return v !== null ? parseInt(v, 10) : 2; } catch { return 2; }
   });
   const [colorPalette, setColorPalette] = useState<ColorPalette>(() => {
     try { return (localStorage.getItem('wif-doggy-palette') as ColorPalette) || 'default'; } catch { return 'default'; }

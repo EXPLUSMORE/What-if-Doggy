@@ -169,7 +169,7 @@ export const translations = {
       musicSub:      'Spielt während der Kampagne',
       musicStyle:    'Musikstil',
       musicAuto:     '🔀 Auto (pro Level)',
-      musicTrilogy:  ['☕ Denker-Kaffee', '🎮 8-Bit Abenteuer', '🌊 Zen bis Sturm', '🕐 Clocks', '🌸 River Flows'] as const,
+      musicTrilogy:  ['🌸 Sommerwiese', '🎮 Pixel-Promenade', '🌊 River Flows', '🕐 Clocks', '✨ Kristallhöhle'] as const,
       sectionPalette:'Farbpalette',
       palette: {
         default: '🎨 Standard',
@@ -373,7 +373,7 @@ export const translations = {
       musicSub:      'Plays during campaign',
       musicStyle:    'Music style',
       musicAuto:     '🔀 Auto (per level)',
-      musicTrilogy:  ['☕ Denker-Kaffee', '🎮 8-Bit Adventure', '🌊 Zen to Storm', '🕐 Clocks', '🌸 River Flows'] as const,
+      musicTrilogy:  ['🌸 Summer Meadow', '🎮 Pixel Promenade', '🌊 River Flows', '🕐 Clocks', '✨ Crystal Cave'] as const,
       sectionPalette:'Color palette',
       palette: {
         default: '🎨 Default',

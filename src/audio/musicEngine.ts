@@ -12,11 +12,11 @@ interface Step { f?: number; d: number; }
 interface LayerDef { p: Step[]; bpm: number; wave: WaveType; gain: number; }
 
 // ── Frequenzen (Hz) ───────────────────────────────────────────
-const C2=65.4,  E2=82.4,  G2=98,   A2=110;
-const C3=130.8, E3=164.8, G3=196,  A3=220,  B3=246.9;
-const C4=261.6, D4=293.7, E4=329.6,F4=349.2,G4=392, A4=440,  B4=493.9;
-const Ab4=415.3,Bb4=466.2;
-const C5=523.3, Cs5=554.4,D5=587.3,Eb5=622.3,E5=659.3,G5=784,B5=987.8;
+const C2=65.4,  D2=73.4,  G2=98,   A2=110, Bb2=116.5;
+const C3=130.8, D3=146.8, F3=174.6, G3=196, A3=220;
+const D4=293.7, F4=349.2, G4=392, A4=440, Bb4=466.2, B4=493.9;
+const Ab4=415.3;
+const C5=523.3, D5=587.3,Eb5=622.3,E5=659.3,G5=784,A5=880,B5=987.8;
 
 const n = (f: number, d: number): Step => ({ f, d });
 const r = (d: number): Step => ({ d });
@@ -24,55 +24,129 @@ const r = (d: number): Step => ({ d });
 // ── 5 Trilogien ──────────────────────────────────────────────
 const TRILOGIES: Array<Record<PhaseKey, LayerDef[] | 'siren'>> = [
 
-  // ── 0: Denker-Kaffee ☕ ────────────────────────────────────
-  {
-    green: [{ bpm:75, wave:'sine', gain:.11, p:[
-      n(C4,2),n(E4,1),n(G4,1),n(C5,2),n(G4,1),n(E4,1),
-    ]}],
-    yellow: [{ bpm:110, wave:'triangle', gain:.15, p:[
-      n(D4,.5),r(.25),n(F4,.5),n(A4,.75),n(F4,.5),r(.25),n(D4,.5),r(1),
-    ]}],
-    red: [
-      { bpm:150, wave:'square',   gain:.08, p:[n(E5,.25),n(B4,.25),n(E5,.25),n(B4,.25),n(E5,.5),n(A4,.5)] },
-      { bpm:150, wave:'sawtooth', gain:.13, p:[n(A2,.5),r(.5)] },
-    ],
-  },
-
-  // ── 1: 8-Bit Abenteuer 🎮 ─────────────────────────────────
-  {
-    green: [{ bpm:95, wave:'square', gain:.08, p:[
-      n(C4,.5),n(E4,.5),n(G4,.5),n(A4,.5),n(G4,.5),n(E4,.5),n(C4,.5),n(D4,.5),
-    ]}],
-    yellow: [{ bpm:125, wave:'sawtooth', gain:.09, p:[
-      n(A3,.5),n(C4,.25),n(B3,.25),n(A3,.5),n(E4,.5),n(D4,.5),n(C4,.25),n(B3,.25),n(A3,1),
-    ]}],
-    red: [
-      { bpm:155, wave:'square', gain:.08, p:[
-        n(E5,.25),r(.25),n(E5,.25),r(.25),n(E5,.5),n(C5,.25),n(E5,.25),n(G5,.5),r(.5),
-      ]},
-      { bpm:155, wave:'square', gain:.12, p:[n(A2,.5),r(.25),n(A2,.25),r(.5),n(E2,.5)] },
-    ],
-  },
-
-  // ── 2: Zen bis Sturm 🌊 ───────────────────────────────────
+  // ── 0: Sommerwiese 🌸 ─────────────────────────────────────
+  // C-Dur, Giana-Sisters-Feeling, leicht & verspielt
+  // Grün: ruhig (82 BPM, Sinus) · Gelb: drängend (108 BPM, Triangle) · Rot: Sturm (148 BPM, Square)
   {
     green: [
-      { bpm:55, wave:'sine', gain:.09, p:[n(C3,4),n(G3,4),n(E3,4),n(C3,4)] },
-      { bpm:55, wave:'sine', gain:.11, p:[r(3),n(C5,.2),r(3.8),r(4),r(3),n(G5,.2),r(3.8),r(4)] },
+      { bpm:82, wave:'sine', gain:.08, p:[
+        n(E5,1),n(C5,.5),n(G5,.5),n(E5,1),n(C5,.5),n(G4,.5),
+        n(D5,1),n(B4,.5),n(G4,.5),n(D5,1),n(B4,1),
+        n(C5,1),n(E5,1),n(G5,2),n(E5,1),n(C5,1),n(G4,2),
+      ]},
+      { bpm:82, wave:'sine', gain:.09, p:[
+        n(C3,2),n(G3,2),n(C3,2),n(G3,2),
+        n(F3,2),n(C3,2),n(G3,2),n(C3,2),
+      ]},
     ],
-    yellow: [{ bpm:100, wave:'triangle', gain:.17, p:[
-      n(C2,.5),r(.5),n(G2,.25),n(C2,.25),r(.5),n(C2,.5),n(A2,.25),r(.25),n(C2,.5),r(.5),
-    ]}],
-    red: 'siren',
+    yellow: [
+      { bpm:108, wave:'triangle', gain:.09, p:[
+        n(E5,1),n(C5,.5),n(G5,.5),n(E5,1),n(C5,.5),n(G4,.5),
+        n(D5,1),n(B4,.5),n(G4,.5),n(D5,1),n(B4,1),
+        n(C5,1),n(E5,1),n(G5,2),n(E5,1),n(C5,1),n(G4,2),
+      ]},
+      { bpm:108, wave:'sine', gain:.10, p:[
+        n(C3,2),n(G3,2),n(C3,2),n(G3,2),
+        n(F3,2),n(C3,2),n(G3,2),n(C3,2),
+      ]},
+    ],
+    red: [
+      { bpm:148, wave:'square', gain:.07, p:[
+        n(E5,.5),n(C5,.25),n(G5,.25),n(E5,.5),n(C5,.25),n(G4,.25),
+        n(D5,.5),n(B4,.25),n(G4,.25),n(D5,.5),n(B4,.5),
+        n(C5,.5),n(E5,.5),n(G5,1),n(E5,.5),n(C5,.5),n(G4,1),
+      ]},
+      { bpm:148, wave:'sawtooth', gain:.12, p:[n(C2,.5),r(.5)] },
+    ],
+  },
+
+  // ── 1: Pixel-Promenade 🎮 ─────────────────────────────────
+  // G-Dur, klassischer Chiptune-Bounce, Square + Sawtooth-Bass
+  // Grün: 108 BPM · Gelb: 132 BPM · Rot: 162 BPM Vollgas
+  {
+    green: [
+      { bpm:108, wave:'square', gain:.065, p:[
+        n(G4,.5),n(B4,.5),n(D5,.5),n(B4,.5),
+        n(G4,.5),n(A4,.5),n(B4,1),
+        n(D5,.5),n(E5,.5),n(D5,.5),n(B4,.5),
+        n(G4,2),
+      ]},
+      { bpm:108, wave:'sawtooth', gain:.08, p:[
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+        n(D3,.5),r(.5),n(D3,.5),r(.5),
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+      ]},
+    ],
+    yellow: [
+      { bpm:132, wave:'square', gain:.08, p:[
+        n(G4,.5),n(B4,.5),n(D5,.5),n(B4,.5),
+        n(G4,.5),n(A4,.5),n(B4,1),
+        n(D5,.5),n(E5,.5),n(D5,.5),n(B4,.5),
+        n(G4,2),
+      ]},
+      { bpm:132, wave:'sawtooth', gain:.10, p:[
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+        n(D3,.5),r(.5),n(D3,.5),r(.5),
+        n(G2,.5),r(.5),n(G2,.5),r(.5),
+      ]},
+    ],
+    red: [
+      { bpm:162, wave:'square', gain:.08, p:[
+        n(G4,.25),n(B4,.25),n(D5,.25),n(G5,.25),
+        n(D5,.25),n(B4,.25),n(G4,.5),
+        n(G4,.25),n(A4,.25),n(B4,.5),r(.25),n(B4,.25),
+      ]},
+      { bpm:162, wave:'sawtooth', gain:.13, p:[n(G2,.5),r(.25),n(G2,.25),r(.5)] },
+    ],
+  },
+
+  // ── 2: River Flows 🌊 ─────────────────────────────────────
+  // D-Moll, meditativ & warm, Triangle-Wellen
+  // Grün: 62 BPM Entspannung · Gelb: 88 BPM Druck · Rot: 122 BPM Staccato
+  {
+    green: [
+      { bpm:62, wave:'triangle', gain:.11, p:[
+        n(D4,2),n(F4,1),n(A4,1),
+        n(D5,2),n(C5,2),
+        n(Bb4,2),n(A4,1),n(G4,1),
+        n(F4,4),
+      ]},
+      { bpm:62, wave:'sine', gain:.10, p:[
+        n(D3,2),n(A3,2),
+        n(Bb2,2),n(F3,2),
+        n(C3,2),n(G2,2),
+        n(D3,4),
+      ]},
+    ],
+    yellow: [
+      { bpm:88, wave:'triangle', gain:.12, p:[
+        n(D4,2),n(F4,1),n(A4,1),
+        n(D5,2),n(C5,2),
+        n(Bb4,2),n(A4,1),n(G4,1),
+        n(F4,4),
+      ]},
+      { bpm:88, wave:'triangle', gain:.11, p:[
+        n(D3,2),n(A3,2),
+        n(Bb2,2),n(F3,2),
+        n(C3,2),n(G2,2),
+        n(D3,4),
+      ]},
+    ],
+    red: [
+      { bpm:122, wave:'square', gain:.08, p:[
+        n(D4,.5),r(.25),n(F4,.5),r(.25),n(A4,.5),r(.25),n(D5,.5),r(.25),
+        n(C5,.5),r(.25),n(A4,.5),r(.25),n(F4,.5),r(.25),n(D4,.5),r(.25),
+      ]},
+      { bpm:122, wave:'sawtooth', gain:.13, p:[n(D2,.5),r(.5)] },
+    ],
   },
 
   // ── 3: Coldplay – Clocks 🕐 ───────────────────────────────
-  // Grün: entspanntes Arpeggio in Eb-Dur (Triplet-Muster, langsam)
-  // Gelb: Original-Tempo, Sägezahn, mehr Druck
-  // Rot: Staccato-Sturm + Bass-Puls
+  // Eb-Dur Triplet-Arpeggio, entspannt bis dramatisch
   {
     green: [{ bpm:80, wave:'sine', gain:.10, p:[
-      // Eb-Dur Arpeggio (vereinfacht, absteigend): Eb5 Bb4 Ab4 Bb4
       n(Eb5,.33),n(Bb4,.33),n(Ab4,.33),
       n(Eb5,.33),n(Bb4,.33),n(Ab4,.33),
       n(Eb5,.33),n(Bb4,.33),n(Ab4,.33),
@@ -93,52 +167,40 @@ const TRILOGIES: Array<Record<PhaseKey, LayerDef[] | 'siren'>> = [
     ],
   },
 
-  // ── 4: Yiruma – River Flows in You 🌸 ────────────────────
-  // Grün: sanfte Hauptmelodie (A-Dur, fließend, Piano-feel)
-  // Gelb: schnellere, drängendere Variation
-  // Rot: alarmierend beschleunigt + Bass
+  // ── 4: Kristallhöhle ✨ ───────────────────────────────────
+  // A-Moll, ethereal & mystisch, Sinus + Triangle-Arpeggios
+  // Grün: 68 BPM schwebend · Gelb: 92 BPM treibend · Rot: 130 BPM Square-Sturm
   {
     green: [
-      // Melodie (rechte Hand)
-      { bpm:65, wave:'sine', gain:.10, p:[
-        n(A4,1.5),n(B4,.5),n(Cs5,1),n(B4,.5),n(A4,.5),
-        r(.5),n(E5,1.5),n(D5,.5),n(Cs5,1),n(B4,.5),n(A4,1),
-        n(A4,1.5),n(B4,.5),n(Cs5,1),n(B4,.5),n(A4,.5),
-        r(.5),n(E5,1),n(E5,.5),n(D5,.5),n(Cs5,.5),n(B4,.5),n(A4,2),
+      { bpm:68, wave:'sine', gain:.09, p:[
+        n(A4,2),n(C5,1),n(E5,1),
+        n(A4,1),n(B4,1),n(C5,2),
+        n(E5,2),n(D5,1),n(C5,1),
+        n(B4,1),n(A4,3),
       ]},
-      // Begleitung (linke Hand) – sanfte Achtelnoten
-      { bpm:65, wave:'sine', gain:.06, p:[
-        n(A3,.5),n(E4,.5),n(A4,.5),n(E4,.5), // A-Dur
-        n(A3,.5),n(E4,.5),n(A4,.5),n(E4,.5),
-        n(B3,.5),n(E4,.5),n(G4,.5),n(E4,.5), // H-Moll
-        n(B3,.5),n(E4,.5),n(G4,.5),n(E4,.5),
-        n(Cs5,.5),n(E4,.5),n(A4,.5),n(E4,.5),// C#-Moll
-        n(Cs5,.5),n(E4,.5),n(A4,.5),n(E4,.5),
-        n(D4,.5),n(A4,.5),n(D5,.5),n(A4,.5), // D-Dur
-        n(D4,.5),n(A4,.5),n(D5,.5),n(A4,.5),
+      { bpm:68, wave:'triangle', gain:.065, p:[
+        n(E5,2),n(C5,2),n(A4,2),n(E5,2),
+        n(D5,2),n(C5,2),n(B4,2),n(A4,2),
       ]},
     ],
     yellow: [
-      { bpm:105, wave:'triangle', gain:.11, p:[
-        n(A4,1),n(B4,.5),n(Cs5,.5),n(B4,.5),n(A4,.5),
-        n(E5,1),n(D5,.5),n(Cs5,.5),n(B4,.5),n(A4,.5),
-        n(A4,1),n(B4,.5),n(Cs5,.5),n(B4,.5),n(A4,.5),
-        n(E5,.5),n(E5,.5),n(D5,.5),n(Cs5,.5),n(B4,.5),n(A4,1),
+      { bpm:92, wave:'triangle', gain:.10, p:[
+        n(A4,2),n(C5,1),n(E5,1),
+        n(A4,1),n(B4,1),n(C5,2),
+        n(E5,2),n(D5,1),n(C5,1),
+        n(B4,1),n(A4,3),
       ]},
-      { bpm:105, wave:'triangle', gain:.07, p:[
-        n(A3,.5),n(E4,.5),n(A3,.5),n(E4,.5),
-        n(B3,.5),n(E4,.5),n(B3,.5),n(E4,.5),
-        n(Cs5,.5),n(E4,.5),n(Cs5,.5),n(E4,.5),
-        n(D4,.5),n(A4,.5),n(D4,.5),n(A4,.5),
+      { bpm:92, wave:'triangle', gain:.07, p:[
+        n(E5,2),n(C5,2),n(A4,2),n(E5,2),
+        n(D5,2),n(C5,2),n(B4,2),n(A4,2),
       ]},
     ],
     red: [
-      { bpm:150, wave:'square', gain:.08, p:[
-        n(A4,.25),n(B4,.25),n(Cs5,.25),n(B4,.25),
-        n(A4,.25),n(E5,.25),n(D5,.25),n(Cs5,.25),
-        n(B4,.5),n(A4,.5),
+      { bpm:130, wave:'square', gain:.08, p:[
+        n(A4,.5),r(.25),n(C5,.5),r(.25),n(E5,.5),r(.25),n(A5,.5),r(.25),
+        n(G5,.5),r(.25),n(E5,.5),r(.25),n(C5,.5),r(.25),n(A4,.5),r(.25),
       ]},
-      { bpm:150, wave:'sawtooth', gain:.12, p:[n(A2,.5),r(.25),n(E2,.25),r(.5)] },
+      { bpm:130, wave:'sawtooth', gain:.12, p:[n(A2,.5),r(.5)] },
     ],
   },
 ];
