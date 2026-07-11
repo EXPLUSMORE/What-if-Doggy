@@ -11,7 +11,7 @@ schtasks /delete /tn "%TASKNAME%" /f >nul 2>&1
 
 schtasks /create ^
   /tn "%TASKNAME%" ^
-  /tr "powershell -WindowStyle Hidden -NonInteractive -ExecutionPolicy Bypass -File \"%SCRIPT%\"" ^
+  /tr "powershell -WindowStyle Hidden -NonInteractive -ExecutionPolicy Bypass -File \"C:\Users\ch\Claude\Projects\What if Doggy\auto-push-task.ps1\"" ^
   /sc minute ^
   /mo 10 ^
   /rl HIGHEST ^
