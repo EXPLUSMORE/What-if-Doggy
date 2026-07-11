@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
 $projectPath = 'C:\Users\ch\Claude\Projects\What if Doggy'
 $logFile = Join-Path $projectPath 'auto-push.log'
 $scriptPath = Join-Path $projectPath 'auto-push.ps1'

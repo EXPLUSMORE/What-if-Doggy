@@ -126,6 +126,24 @@ Testabdeckung:
 - `tests/unit/validator.test.ts` – Validator (alle 4 Regeltypen, Hint, Auto-Exclude)
 - `tests/integration/game.test.tsx` – Spielablauf (useGame Hook, What-if, Undo/Redo, Sieg)
 
+## Auto-Push mit GitHub Actions
+
+Für automatische Syncs auf GitHub kann ein Workflow verwendet werden, der alle 10 Minuten prüft, ob Änderungen vorliegen und diese dann automatisch commitet/pusht.
+
+### Aktivieren
+
+1. Repository auf GitHub öffnen
+2. In den Repositories-Einstellungen unter Actions → Workflow permissions sicherstellen, dass „Read and write permissions“ erlaubt ist
+3. Den Workflow [.github/workflows/auto-push.yml](.github/workflows/auto-push.yml) einmal manuell starten
+4. Danach läuft er automatisch alle 10 Minuten
+
+### Manuell testen
+
+```bash
+# Workflow einmalig starten
+# über GitHub → Actions → Auto-push changes → Run workflow
+```
+
 ## Tech-Stack
 
 - **React 18** + **TypeScript 5** + **Vite 5**
