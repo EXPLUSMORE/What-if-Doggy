@@ -1,5 +1,7 @@
 // ============================================================
-// Cell -- Einzelne Spielfeldzelle
+// Cell – Einzelne Spielfeldzelle
+// Pointer-Events werden vom GameBoard verwaltet (Swipe-Support).
+// data-row / data-col erlauben elementFromPoint-Lookup.
 // ============================================================
 
 import type { Cell as CellType, Puzzle } from '../../types';
@@ -8,15 +10,11 @@ interface CellProps {
   cell: CellType;
   puzzle: Puzzle;
   focused: boolean;
-  onClick: () => void;
   onFocus: () => void;
 }
 
-/** Gibt zurueck welche Seiten dieser Zelle eine dicke Regiongrenze haben sollen. */
 function getRegionBorders(
-  row: number,
-  col: number,
-  puzzle: Puzzle,
+  row: number, col: number, puzzle: Puzzle,
 ): { top: boolean; right: boolean; bottom: boolean; left: boolean } {
   const id = puzzle.regionMap[row][col];
   const size = puzzle.size;
@@ -28,7 +26,7 @@ function getRegionBorders(
   };
 }
 
-export function Cell({ cell, puzzle, focused, onClick, onFocus }: CellProps) {
+export function Cell({ cell, puzzle, focused, onFocus }: CellProps) {
   const { row, col, state, source, conflict } = cell;
   const regionId = puzzle.regionMap[row][col];
   const region = puzzle.regions.find(r => r.id === regionId);
@@ -36,23 +34,24 @@ export function Cell({ cell, puzzle, focused, onClick, onFocus }: CellProps) {
 
   const classNames = [
     'cell',
-    conflict ? 'cell--conflict' : '',
-    focused ? 'cell--focused' : '',
+    conflict   ? 'cell--conflict' : '',
+    focused    ? 'cell--focused'  : '',
     source === 'whatif' ? 'cell--whatif' : '',
-    borders.top ? 'cell--border-top' : '',
-    borders.right ? 'cell--border-right' : '',
+    borders.top    ? 'cell--border-top'    : '',
+    borders.right  ? 'cell--border-right'  : '',
     borders.bottom ? 'cell--border-bottom' : '',
-    borders.left ? 'cell--border-left' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+    borders.left   ? 'cell--border-left'   : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div
       className={classNames}
       style={{ background: region?.color ?? '#ccc' }}
-      onClick={onClick}
+      // Pointer-Events werden im Board-Container verarbeitet
       onMouseEnter={onFocus}
+      // data-Attribute für elementFromPoint-Lookup im Swipe-Handler
+      data-row={row}
+      data-col={col}
       role="button"
       tabIndex={focused ? 0 : -1}
       aria-label={`Zelle ${row + 1},${col + 1}: ${state}`}
