@@ -43,7 +43,7 @@ export interface Puzzle {
 }
 
 /** Schwierigkeitsgrade */
-export type Difficulty = 'easy' | 'medium' | 'hard';
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert' | 'master';
 
 /** Spielfeld-State: Zustand jeder Zelle */
 export type GridState = Cell[][];
@@ -161,4 +161,9 @@ export const REGION_COLORS: ReadonlyArray<string> = [
   'var(--region-7)',
   'var(--region-8)',
   'var(--region-9)',
+  'var(--region-10)',
+  'var(--region-11)',
+  'var(--region-12)',
+  'var(--region-13)',
+  'var(--region-14)',
 ];

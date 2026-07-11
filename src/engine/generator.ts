@@ -123,7 +123,7 @@ function pruneToUnique(
   const map = initialMap.map(r => [...r]);
 
   // Iterationslimit skaliert mit Gittergröße (10×10 braucht deutlich mehr Schritte)
-  const maxIter = size * size * 30;
+  const maxIter = size <= 10 ? size * size * 30 : size * size * 45;
   for (let iter = 0; iter < maxIter; iter++) {
     const result = solvePuzzle({ size, regionMap: map as ReadonlyArray<ReadonlyArray<number>> });
 
@@ -199,6 +199,8 @@ const SIZE_BY_DIFFICULTY: Record<Difficulty, number> = {
   easy:   6,
   medium: 8,
   hard:   10,
+  expert: 12,
+  master: 15,
 };
 
 export function generatePuzzle(options: GeneratorOptions = {}): Puzzle {
@@ -207,7 +209,7 @@ export function generatePuzzle(options: GeneratorOptions = {}): Puzzle {
   const baseSeed = options.seed ?? `${Date.now()}-${Math.random()}`;
 
   // Mehr Versuche für größere Gitter
-  const maxAttempts = size <= 6 ? 30 : size <= 8 ? 80 : 200;
+  const maxAttempts = size <= 6 ? 30 : size <= 8 ? 80 : size <= 10 ? 200 : size <= 12 ? 350 : 500;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const seed = `${baseSeed}-${attempt}`;
     const rand = mulberry32(seedToNumber(seed));
@@ -275,21 +277,57 @@ export function todayKey(): string {
 // ── Kampagnen-Level ───────────────────────────────────────────
 
 /** Gesamtanzahl der Kampagnen-Level */
-export const MAX_CAMPAIGN_LEVEL = 30;
+export const MAX_CAMPAIGN_LEVEL = 50;
 
 export function getLevelDifficulty(level: number): Difficulty {
   if (level <= 8)  return 'easy';
   if (level <= 20) return 'medium';
-  return 'hard'; // 21-30
+  if (level <= 30) return 'hard';
+  if (level <= 40) return 'expert';
+  return 'master'; // 41-50
 }
+
+/** Modul-level Cache: einmal generiert, nie wieder neu berechnet */
+const levelPuzzleCache = new Map<number, Puzzle>();
 
 export function generateLevelPuzzle(level: number): Puzzle {
   if (level <= MAX_CAMPAIGN_LEVEL) {
+    const cached = levelPuzzleCache.get(level);
+    if (cached) return cached;
     const difficulty = getLevelDifficulty(level);
-    return generatePuzzle({ difficulty, seed: `campaign-level-${level}-v1` });
+    const puzzle = generatePuzzle({ difficulty, seed: `campaign-level-${level}-v1` });
+    levelPuzzleCache.set(level, puzzle);
+    return puzzle;
   }
   // Endless: zufällige Schwierigkeit
-  const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
+  const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'expert', 'master'];
   const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
   return generatePuzzle({ difficulty });
+}
+
+/**
+ * Vorgenerierung aller Kampagnen-Level im Hintergrund.
+ * Easy-Level zuerst (schnell), Hard zuletzt (langsam).
+ * Nutzt requestIdleCallback falls verfügbar, sonst setTimeout(8ms).
+ */
+export function prefetchLevelPuzzles(): void {
+  const order = [
+    ...Array.from({ length: 8  }, (_, i) => i + 1),   // easy   1-8
+    ...Array.from({ length: 12 }, (_, i) => i + 9),   // medium 9-20
+    ...Array.from({ length: 10 }, (_, i) => i + 21),  // hard   21-30
+    ...Array.from({ length: 10 }, (_, i) => i + 31),  // expert 31-40
+    ...Array.from({ length: 10 }, (_, i) => i + 41),  // master 41-50
+  ];
+  let i = 0;
+  const next = () => {
+    if (i >= order.length) return;
+    const level = order[i++];
+    if (!levelPuzzleCache.has(level)) generateLevelPuzzle(level);
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(next, { timeout: 500 });
+    } else {
+      setTimeout(next, 8);
+    }
+  };
+  setTimeout(next, 300); // erst nach App-Start
 }

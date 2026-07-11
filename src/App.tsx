@@ -7,7 +7,10 @@ import { useGame } from './hooks/useGame';
 import { useTimer } from './hooks/useTimer';
 import { useMusic } from './hooks/useMusic';
 import { useBoardSize } from './hooks/useBoardSize';
-import { generatePuzzle } from './engine/generator';
+import { generatePuzzle, prefetchLevelPuzzles } from './engine/generator';
+
+// Kampagnen-Puzzles sofort im Hintergrund vorgenerieren
+prefetchLevelPuzzles();
 import { Header } from './components/Header/Header';
 import { GameBoard } from './components/Board/GameBoard';
 import { TopControls, BottomControls } from './components/Controls/Controls';

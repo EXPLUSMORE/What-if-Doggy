@@ -10,6 +10,8 @@ export const translations = {
       easy:   'Einfach',
       medium: 'Mittel',
       hard:   'Schwer',
+      expert: 'Experte',
+      master: 'Meister',
     },
     header: {
       timerLabel:    'Spielzeit',
@@ -24,11 +26,15 @@ export const translations = {
         easy:   'Einfach (6x6)',
         medium: 'Mittel (8x8)',
         hard:   'Schwer (10x10)',
+        expert: 'Experte (12x12)',
+        master: 'Meister (15x15)',
       },
       difficultyBtnShort: {
         easy:   'E(6x6)',
         medium: 'M(8x8)',
         hard:   'H(10x10)',
+        expert: 'X(12x12)',
+        master: 'M(15x15)',
       },
     },
     controls: {
@@ -61,7 +67,7 @@ export const translations = {
       levelComplete:    (n: number) => `Level ${n} geschafft! 🐾`,
       nextLevel:        (n: number) => `Weiter zu Level ${n} →`,
       champion:         '🏆 Kampagne abgeschlossen!',
-      championMsg:      'Alle 30 Level gemeistert! Du bist ein echter Spürhund!',
+      championMsg:      'Alle 50 Level gemeistert! Du bist ein echter Meister-Spürhund!',
       restartCampaign:  '🔄 Kampagne neu starten',
       endlessContinue:  '🔥 Endlos weiterspielen',
       levelOf:          (n: number, total: number) => `${n} von ${total}`,
@@ -98,9 +104,11 @@ export const translations = {
       start:  "Los geht's!",
       cancel: 'Abbrechen',
       options: [
-        { label: 'Einfach', desc: '6x6 Gitter - perfekt zum Aufwaermen' },
-        { label: 'Mittel',  desc: '8x8 Gitter - die klassische Herausforderung' },
-        { label: 'Schwer',  desc: '10x10 Gitter - fuer Profis' },
+        { label: 'Einfach',  desc: '6x6 Gitter - perfekt zum Aufwaermen' },
+        { label: 'Mittel',   desc: '8x8 Gitter - die klassische Herausforderung' },
+        { label: 'Schwer',   desc: '10x10 Gitter - fuer Profis' },
+        { label: 'Experte',  desc: '12x12 Gitter - fuer Kenner' },
+        { label: 'Meister',  desc: '15x15 Gitter - fuer absolute Profis' },
       ],
     },
     rules: {
@@ -141,7 +149,7 @@ export const translations = {
         {
           icon: '🏅',
           heading: 'Kampagnen-Modus',
-          body: '30 Level warten: 1–8 <b>Einfach</b>, 9–20 <b>Mittel</b>, 21–30 <b>Schwer</b>.<br/>Leben und Knochen übertragen sich zwischen den Levels – jeder Fehler zählt!<br/>Nach Level 30 startet ein <b>Endlos-Modus</b> mit zufälliger Schwierigkeit.',
+          body: '50 Level warten: 1–8 <b>Einfach</b>, 9–20 <b>Mittel</b>, 21–30 <b>Schwer</b>, 31–40 <b>Experte</b>, 41–50 <b>Meister</b>.<br/>Leben und Knochen übertragen sich zwischen den Levels – jeder Fehler zählt!<br/>Nach Level 50 startet ein <b>Endlos-Modus</b> mit zufälliger Schwierigkeit.',
         },
         {
           icon: '🦴',
@@ -151,7 +159,7 @@ export const translations = {
         {
           icon: '🗺️',
           heading: 'Levelauswahl',
-          body: 'Über <b>🗺️ Level</b> kannst du alle 30 Level als Miniaturansicht sehen und die Kampagne an beliebiger Stelle starten.',
+          body: 'Über <b>🗺️ Level</b> kannst du alle 50 Level als Miniaturansicht sehen und die Kampagne an beliebiger Stelle starten.',
         },
       ],
     },
@@ -214,6 +222,8 @@ export const translations = {
       easy:   'Easy',
       medium: 'Medium',
       hard:   'Hard',
+      expert: 'Expert',
+      master: 'Master',
     },
     header: {
       timerLabel:    'Time played',
@@ -228,11 +238,15 @@ export const translations = {
         easy:   'Easy (6x6)',
         medium: 'Medium (8x8)',
         hard:   'Hard (10x10)',
+        expert: 'Expert (12x12)',
+        master: 'Master (15x15)',
       },
       difficultyBtnShort: {
         easy:   'E(6x6)',
         medium: 'M(8x8)',
         hard:   'H(10x10)',
+        expert: 'X(12x12)',
+        master: 'M(15x15)',
       },
     },
     controls: {
@@ -265,7 +279,7 @@ export const translations = {
       levelComplete:    (n: number) => `Level ${n} complete! 🐾`,
       nextLevel:        (n: number) => `Next: Level ${n} →`,
       champion:         '🏆 Campaign complete!',
-      championMsg:      'All 30 levels mastered! You are a true sniffing champion!',
+      championMsg:      'All 50 levels mastered! You are a true sniffing Grandmaster!',
       restartCampaign:  '🔄 Restart Campaign',
       endlessContinue:  '🔥 Keep going (Endless)',
       levelOf:          (n: number, total: number) => `${n} of ${total}`,
@@ -305,6 +319,8 @@ export const translations = {
         { label: 'Easy',   desc: '6x6 grid - perfect warm-up' },
         { label: 'Medium', desc: '8x8 grid - the classic challenge' },
         { label: 'Hard',   desc: '10x10 grid - for experts' },
+        { label: 'Expert', desc: '12x12 grid - for connoisseurs' },
+        { label: 'Master', desc: '15x15 grid - for absolute pros' },
       ],
     },
     rules: {
@@ -345,7 +361,7 @@ export const translations = {
         {
           icon: '🏅',
           heading: 'Campaign mode',
-          body: '30 levels await: 1–8 <b>Easy</b>, 9–20 <b>Medium</b>, 21–30 <b>Hard</b>.<br/>Lives and bones carry over between levels – every mistake counts!<br/>After level 30, an <b>endless mode</b> begins with random difficulty.',
+          body: '50 levels await: 1–8 <b>Easy</b>, 9–20 <b>Medium</b>, 21–30 <b>Hard</b>, 31–40 <b>Expert</b>, 41–50 <b>Master</b>.<br/>Lives and bones carry over between levels – every mistake counts!<br/>After level 50, an <b>endless mode</b> begins with random difficulty.',
         },
         {
           icon: '🦴',
@@ -355,7 +371,7 @@ export const translations = {
         {
           icon: '🗺️',
           heading: 'Level select',
-          body: 'Use the <b>🗺️ Level</b> button to view all 30 levels as miniatures and start the campaign at any level.',
+          body: 'Use the <b>🗺️ Level</b> button to view all 50 levels as miniatures and start the campaign at any level.',
         },
       ],
     },

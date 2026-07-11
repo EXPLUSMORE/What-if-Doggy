@@ -42,7 +42,7 @@ export function useMusic({
   trilogyRef.current = trilogyOverride >= 0 ? trilogyOverride : getTrilogyForLevel(level);
 
   useEffect(() => {
-    if (!enabled || !campaignMode) {
+    if (!enabled) {
       stopMusic();
       return;
     }
@@ -50,7 +50,8 @@ export function useMusic({
       stopMusic();
       return;
     }
-    const phase = getPhase(countdownSeconds);
+    // Im Kampagnenmodus Phase aus Countdown ableiten, sonst immer grün
+    const phase = campaignMode ? getPhase(countdownSeconds) : 'green';
     playPhase(trilogyRef.current, phase);
   }, [enabled, campaignMode, won, gameOver, countdownSeconds, level, trilogyOverride]);
 
