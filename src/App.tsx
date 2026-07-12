@@ -8,6 +8,7 @@ import { useTimer } from './hooks/useTimer';
 import { useMusic } from './hooks/useMusic';
 import { useBoardSize } from './hooks/useBoardSize';
 import { generatePuzzle } from './engine/generator';
+import { getHint } from './engine/validator';
 import type { Puzzle } from './types';
 
 import { Header } from './components/Header/Header';
@@ -19,6 +20,8 @@ import { RulesModal } from './components/Modals/RulesModal';
 import { SolutionModal } from './components/Modals/SolutionModal';
 import { GameOverModal } from './components/Modals/GameOverModal';
 import { LevelSelectModal } from './components/Modals/LevelSelectModal';
+import { HintModal } from './components/Modals/HintModal';
+import type { HintData } from './components/Modals/HintModal';
 import { SettingsModal } from './components/Modals/SettingsModal';
 import { useLang } from './i18n/LanguageContext';
 import type { Difficulty, ColorPalette } from './types';
@@ -58,6 +61,7 @@ export default function App() {
   const [showSolution, setShowSolution] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLevelSelect, setShowLevelSelect] = useState(false);
+  const [hintData, setHintData] = useState<HintData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { t } = useLang();
 
@@ -243,6 +247,20 @@ export default function App() {
     });
   };
 
+  const handleHint = () => {
+    if (state.won || state.gameOver) return;
+    const hint = getHint(state.grid, state.puzzle);
+    if (!hint) { alert(t.hint.noHint); return; }
+    const regionId = state.puzzle.regionMap[hint.row][hint.col];
+    const region = state.puzzle.regions[regionId];
+    setHintData({
+      row: hint.row,
+      col: hint.col,
+      regionLabel: region.label,
+      puzzleSize: state.puzzle.size,
+    });
+  };
+
   const controlProps = {
     canUndo,
     canRedo,
@@ -254,7 +272,7 @@ export default function App() {
     onRedo: redo,
     onToggleWhatIf: toggleWhatIf,
     onRestart: restart,
-    onHint: applyHint,
+    onHint: handleHint,
     onNewPuzzle: handleNewPuzzle,
     onOpenDaily: handleOpenDaily,
     onOpenRules: () => setShowRules(true),

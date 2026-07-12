@@ -404,13 +404,16 @@ function gameReducer(state: GameState, action: Action): GameState {
     }
 
     case 'APPLY_HINT': {
-      const hint = getHint(state.grid, state.puzzle);
-      if (!hint) return state;
-      return gameReducer(state, { type: 'DOUBLE_CLICK_CELL', row: hint.row, col: hint.col });
+      // Kein Hund mehr platzieren – nur Knochen abziehen.
+      // Der verbale Hinweis wird im UI (App.tsx + HintModal) angezeigt.
+      if (state.won || state.gameOver) return state;
+      const { lives, bones, gameOver } = applyError(state.lives, state.bones);
+      const next: GameState = { ...state, lives, bones, gameOver };
+      saveToStorage(next);
+      return next;
     }
 
     case 'APPLY_PENALTY': {
-      if (!state.campaignMode) return state;
       const { lives, bones, gameOver } = applyError(state.lives, state.bones);
       const next: GameState = { ...state, lives, bones, gameOver };
       saveToStorage(next);

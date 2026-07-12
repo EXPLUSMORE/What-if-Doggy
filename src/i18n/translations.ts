@@ -192,6 +192,15 @@ export const translations = {
       button:        '⚙️',
     },
     restartConfirm: 'Spiel wirklich neu starten?',
+    hint: {
+      title:       '💡 Tipp',
+      costWarning: 'Ein Tipp kostet einen Knochen 🦴.',
+      noBones:     'Keine Knochen mehr! Kein Tipp verfügbar.',
+      confirm:     'Tipp anzeigen 🦴 -1',
+      cancel:      'Abbrechen',
+      close:       'Verstanden',
+      noHint:      'Kein Tipp verfügbar – alle Hunde sind bereits platziert!',
+    },
     levelSelect: {
       title:    '🗺️ Level auswählen',
       subtitle: 'Tippe auf ein Level um die Kampagne dort zu starten.',
@@ -404,6 +413,15 @@ export const translations = {
       button:        '⚙️',
     },
     restartConfirm: 'Really restart the game?',
+    hint: {
+      title:       '💡 Hint',
+      costWarning: 'A hint costs one bone 🦴.',
+      noBones:     'No bones left! No hint available.',
+      confirm:     'Show hint 🦴 -1',
+      cancel:      'Cancel',
+      close:       'Got it',
+      noHint:      'No hint available – all dogs are already placed!',
+    },
     levelSelect: {
       title:    '🗺️ Select Level',
       subtitle: 'Tap a level to start the campaign from there.',
