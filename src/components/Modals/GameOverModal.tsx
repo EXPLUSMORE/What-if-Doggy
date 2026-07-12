@@ -20,9 +20,9 @@ export function GameOverModal({ onRestart, onNewPuzzle }: GameOverModalProps) {
         </p>
         <p className="modal__subtitle">{t.gameOver.subtitle}</p>
 
-        {/* Leere Leben anzeigen */}
+        {/* Leere Knochen anzeigen */}
         <div style={{ fontSize: '2rem', margin: '1rem 0', opacity: 0.3 }}>
-          🐕 🐕 🐕
+          🦴 🦴 🦴
         </div>
 
         <div className="modal__actions">

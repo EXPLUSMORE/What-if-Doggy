@@ -228,48 +228,65 @@ export default function App() {
     trilogyOverride: musicTrilogy,
   });
 
-  const handleSelectDifficulty = (difficulty: Difficulty) =>
+  // Sofort-Reset: schließt GameOver/Win-Modal und stoppt den Timer,
+  // bevor die async Generierung beginnt → kein hängendes Modal, kein laufender Timer.
+  const clearBeforeGen = () => restart();
+
+  const handleSelectDifficulty = (difficulty: Difficulty) => {
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await workerPost({ type: 'generate', options: { difficulty } });
       loadPuzzle(puzzle);
     });
+  };
 
-  const handleNewPuzzle = (difficulty: Difficulty) =>
+  const handleNewPuzzle = (difficulty: Difficulty) => {
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await workerPost({ type: 'generate', options: { difficulty } });
       loadPuzzle(puzzle);
     });
+  };
 
-  const handleStartCampaign = () =>
+  const handleStartCampaign = () => {
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await getLevel(1);
       loadCampaignPuzzle(puzzle, 1, { resetLives: true, countdownDuration: timerDuration });
     });
+  };
 
-  const handleSelectLevel = (level: number) =>
+  const handleSelectLevel = (level: number) => {
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await getLevel(level);
       loadCampaignPuzzle(puzzle, level, { resetLives: true, countdownDuration: timerDuration });
     });
+  };
 
-  const handleNextLevel = () =>
+  const handleNextLevel = () => {
+    const completedLevel = state.level;
+    const nextLvl = completedLevel + 1;
+    const bonusReward = completedLevel > 0 && completedLevel % 5 === 0;
+    clearBeforeGen();
     gen(async () => {
-      const completedLevel = state.level;
-      const nextLvl = completedLevel + 1;
-      const bonusReward = completedLevel > 0 && completedLevel % 5 === 0;
       const puzzle = await getLevel(nextLvl);
       loadCampaignPuzzle(puzzle, nextLvl, { resetLives: false, bonusReward, countdownDuration: timerDuration });
     });
+  };
 
-  const handleRestartCampaign = () =>
+  const handleRestartCampaign = () => {
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await getLevel(1);
       loadCampaignPuzzle(puzzle, 1, { resetLives: true, countdownDuration: timerDuration });
     });
+  };
 
   const handleOpenDaily = () => setShowDaily(true);
   const handleSelectDaily = (difficulty: Difficulty) => {
     setShowDaily(false);
+    clearBeforeGen();
     gen(async () => {
       const puzzle = await workerPost({ type: 'daily', difficulty });
       loadPuzzle(puzzle);
@@ -448,6 +465,7 @@ export default function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+
 
       {state.gameOver && (
         <GameOverModal
