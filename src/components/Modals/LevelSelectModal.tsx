@@ -60,21 +60,26 @@ export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: Level
 
   useEffect(() => {
     let cancelled = false;
-    // 3 parallele Slots — Cache-Hits (prefetched) sind sofort fertig
-    const BATCH = 3;
-    let next = 0;
+    // Delay je nach Schwierigkeit: Cache-Hits (Level 1-30) sind sofort,
+    // Expert/Master brauchen Luft damit die UI nicht einfriert.
+    const delayFor = (level: number) =>
+      level <= 20 ? 0 : level <= 30 ? 20 : level <= 40 ? 120 : 250;
 
-    const launch = (i: number) => {
+    // Sequenziell: jedes Level wartet auf das vorherige
+    let i = 0;
+    const launchNext = () => {
       if (cancelled || i >= MAX_CAMPAIGN_LEVEL) return;
+      const idx = i++;
+      const level = idx + 1;
       setTimeout(() => {
         if (cancelled) return;
-        const puzzle = generateLevelPuzzle(i + 1);
-        setPuzzles(prev => { const a = [...prev]; a[i] = puzzle; return a; });
-        if (next < MAX_CAMPAIGN_LEVEL) launch(next++);
-      }, 0);
+        const puzzle = generateLevelPuzzle(level);
+        setPuzzles(prev => { const a = [...prev]; a[idx] = puzzle; return a; });
+        launchNext();
+      }, delayFor(level));
     };
-
-    for (let b = 0; b < BATCH && next < MAX_CAMPAIGN_LEVEL; b++) launch(next++);
+    // Erste 3 Level sofort parallel starten (sind gecacht)
+    for (let b = 0; b < 3 && i < MAX_CAMPAIGN_LEVEL; b++) launchNext();
     return () => { cancelled = true; };
   }, []);
 

@@ -311,12 +311,12 @@ export function generateLevelPuzzle(level: number): Puzzle {
  * Nutzt requestIdleCallback falls verfügbar, sonst setTimeout(8ms).
  */
 export function prefetchLevelPuzzles(): void {
+  // Expert/Master werden NICHT prefetched – zu langsam für den Hauptthread.
+  // Sie werden on-demand mit Ladeindikator generiert.
   const order = [
     ...Array.from({ length: 8  }, (_, i) => i + 1),   // easy   1-8
     ...Array.from({ length: 12 }, (_, i) => i + 9),   // medium 9-20
     ...Array.from({ length: 10 }, (_, i) => i + 21),  // hard   21-30
-    ...Array.from({ length: 10 }, (_, i) => i + 31),  // expert 31-40
-    ...Array.from({ length: 10 }, (_, i) => i + 41),  // master 41-50
   ];
   let i = 0;
   const next = () => {
@@ -324,9 +324,9 @@ export function prefetchLevelPuzzles(): void {
     const level = order[i++];
     if (!levelPuzzleCache.has(level)) generateLevelPuzzle(level);
     if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(next, { timeout: 500 });
+      requestIdleCallback(next, { timeout: 1000 });
     } else {
-      setTimeout(next, 8);
+      setTimeout(next, 50); // mehr Luft zwischen Generierungen
     }
   };
   setTimeout(next, 300); // erst nach App-Start
