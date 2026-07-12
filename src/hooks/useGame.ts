@@ -7,7 +7,7 @@
 
 import { useReducer, useCallback, useEffect, useRef } from 'react';
 import type { Puzzle, GridState, GameState, Move, CellState, CellSource, SavedGame } from '../types';
-import { validateGrid, isWon, getHint } from '../engine/validator';
+import { validateGrid, isWon } from '../engine/validator';
 import { generatePuzzle, getDailyPuzzle, generateLevelPuzzle } from '../engine/generator';
 
 // ── Hilfsfunktionen ──────────────────────────────────────────

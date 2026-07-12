@@ -426,6 +426,16 @@ export default function App() {
           onNewPuzzle={() => handleNewPuzzle(state.puzzle.difficulty)}
         />
       )}
+
+      
+      {hintData && (
+        <HintModal
+          hintData={hintData}
+          bones={state.bones}
+          onConfirm={() => applyHint()}
+          onClose={() => setHintData(null)}
+        />
+      )}
     </>
   );
 }
