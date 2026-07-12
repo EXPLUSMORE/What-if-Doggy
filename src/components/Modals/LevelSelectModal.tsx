@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useLang } from '../../i18n/LanguageContext';
 import { MAX_CAMPAIGN_LEVEL } from '../../engine/generator';
 import type { Puzzle, Difficulty } from '../../types';
@@ -7,8 +7,6 @@ interface LevelSelectModalProps {
   currentLevel: number;
   onSelectLevel: (level: number) => void;
   onClose: () => void;
-  /** Async puzzle generator – runs in Web Worker, never blocks main thread */
-  onGenerateLevel: (level: number) => Promise<Puzzle>;
 }
 
 function getLevelDifficulty(level: number): Difficulty {
@@ -54,31 +52,50 @@ const DIFF_DOT: Record<Difficulty, string> = {
   expert: '#8b5cf6', master: '#0ea5e9',
 };
 
-export function LevelSelectModal({ currentLevel, onSelectLevel, onClose, onGenerateLevel }: LevelSelectModalProps) {
+export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: LevelSelectModalProps) {
   const { t } = useLang();
   const [puzzles, setPuzzles] = useState<(Puzzle | null)[]>(
     () => Array(MAX_CAMPAIGN_LEVEL).fill(null)
   );
 
-  const loadLevel = useCallback((level: number) => {
-    onGenerateLevel(level)
-      .then(puzzle => setPuzzles(prev => {
-        const a = [...prev];
-        a[level - 1] = puzzle;
-        return a;
-      }))
-      .catch(() => { /* ignore – skeleton stays */ });
-  }, [onGenerateLevel]);
-
   useEffect(() => {
-    // Fire all requests to the Worker at once.
-    // Worker is single-threaded → processes sequentially;
-    // thumbnails appear progressively as responses arrive.
-    // Main thread is NEVER blocked.
-    for (let lvl = 1; lvl <= MAX_CAMPAIGN_LEVEL; lvl++) {
-      loadLevel(lvl);
+    // Eigener Worker – wird beim Schließen des Modals sofort terminiert.
+    // Der Kampagnen-Worker bleibt dadurch immer frei für Gameplay-Anfragen.
+    const worker = new Worker(
+      new URL('../../workers/puzzle.worker.ts', import.meta.url),
+      { type: 'module' }
+    );
+
+    worker.onmessage = (e: MessageEvent<{ id: string; puzzle: Puzzle | null; level: number }>) => {
+      const { puzzle, level } = e.data;
+      if (puzzle) {
+        setPuzzles(prev => {
+          const a = [...prev];
+          a[level - 1] = puzzle;
+          return a;
+        });
+      }
+    };
+
+    // Nur Easy/Medium (Level 1–20) sofort laden – sind schnell (<100ms je).
+    // Hard (21–30) mit kleiner Verzögerung, Expert/Master (31–50) gar nicht
+    // vorladen: Thumbnails bleiben Skeleton. Modal-Worker würde sonst den
+    // Kampagnen-Worker blockieren wenn der User zwischenzeitlich Level auswählt.
+    for (let lvl = 1; lvl <= Math.min(MAX_CAMPAIGN_LEVEL, 20); lvl++) {
+      worker.postMessage({ id: String(lvl), type: 'level', level: lvl });
     }
-  }, [loadLevel]);
+    // Hard-Level mit 200ms Verzögerung, damit Easy/Medium zuerst erscheinen
+    setTimeout(() => {
+      for (let lvl = 21; lvl <= Math.min(MAX_CAMPAIGN_LEVEL, 30); lvl++) {
+        worker.postMessage({ id: String(lvl), type: 'level', level: lvl });
+      }
+    }, 200);
+
+    return () => {
+      // Modal geschlossen → alle laufenden/ausstehenden Generierungen sofort abbrechen
+      worker.terminate();
+    };
+  }, []);
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal

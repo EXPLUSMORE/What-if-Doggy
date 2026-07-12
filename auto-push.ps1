@@ -1,8 +1,5 @@
-# auto-push.ps1 – Läuft im Hintergrund via Windows Task Scheduler
-# Committet und pusht automatisch alle Änderungen im What if Doggy Projekt
-
-# KEIN ErrorActionPreference = Stop – git schreibt Warnings auf stderr,
-# die PowerShell sonst als Fehler behandelt.
+# auto-push.ps1 - Laeuft im Hintergrund via Windows Task Scheduler
+# Committet und pusht automatisch alle Aenderungen im What if Doggy Projekt
 
 $projectPath = 'C:\Users\ch\Claude\Projects\What if Doggy'
 $logFile     = Join-Path $projectPath 'auto-push.log'
@@ -12,10 +9,9 @@ function Log($msg) {
     Add-Content -Path $logFile -Value "[$ts] $msg"
 }
 
-# git-Befehl ausführen, alle Ausgaben sammeln, Exit-Code prüfen
 function Invoke-Git {
-    param([string[]]$args)
-    $out = & git @args 2>&1
+    param([string[]]$gitArgs)
+    $out = & git @gitArgs 2>&1
     return [PSCustomObject]@{ Output = $out -join "`n"; Ok = ($LASTEXITCODE -eq 0) }
 }
 
@@ -26,20 +22,36 @@ if (-not (Test-Path '.git')) {
     exit 1
 }
 
-# Änderungen vorhanden?
+# Lock-Handling: verhindert Konflikte wenn Sandbox oder anderer Prozess git benutzt.
+# Junger Lock (< 60s) = anderer Prozess laeuft gerade  -> ruhig abwarten, nichts tun.
+# Alter Lock  (> 60s) = Crash-Ueberbleibsel            -> aufraumen und weitermachen.
+$lockFiles = @('.git\index.lock', '.git\HEAD.lock', '.git\refs\heads\main.lock')
+foreach ($lockFile in $lockFiles) {
+    $lockPath = Join-Path $projectPath $lockFile
+    if (Test-Path $lockPath) {
+        $age = (Get-Date) - (Get-Item $lockPath).LastWriteTime
+        if ($age.TotalSeconds -lt 60) {
+            # Aktiver Prozess - nicht stoeren
+            exit 0
+        }
+        # Staler Lock - entfernen
+        Remove-Item -Force $lockPath -ErrorAction SilentlyContinue
+        Log "Staler Lock entfernt: $lockFile ($([int]$age.TotalSeconds)s alt)"
+    }
+}
+
+# Aenderungen vorhanden?
 $status = (& git status --porcelain 2>&1) -join ''
 if ([string]::IsNullOrWhiteSpace($status)) {
-    # Nichts zu tun – kein Log
     exit 0
 }
 
 # Staging
 & git add -A 2>&1 | Out-Null
 
-# Prüfen ob nach Staging wirklich etwas staged ist
+# Pruefen ob nach Staging wirklich etwas staged ist
 & git diff --cached --quiet 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) {
-    # Alles schon committed
     exit 0
 }
 
@@ -59,4 +71,4 @@ if (-not $r.Ok) {
     exit 1
 }
 
-Log "OK – committed & pushed: $commitMsg"
+Log "OK: $commitMsg"

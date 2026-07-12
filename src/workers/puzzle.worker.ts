@@ -1,10 +1,3 @@
-// ============================================================
-// puzzle.worker.ts – Puzzle-Generierung im Web Worker
-//
-// Läuft in einem separaten Thread, blockiert nie den Main-Thread.
-// Kommuniziert via postMessage (structured clone).
-// ============================================================
-
 import { generatePuzzle, getDailyPuzzle, generateLevelPuzzle } from '../engine/generator';
 import type { GeneratorOptions } from '../engine/generator';
 import type { Difficulty } from '../types';
@@ -23,8 +16,10 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       case 'level':    puzzle = generateLevelPuzzle(req.level); break;
       case 'daily':    puzzle = getDailyPuzzle(new Date(), req.difficulty); break;
     }
-    self.postMessage({ id: req.id, puzzle, error: null });
+    const level = req.type === 'level' ? req.level : undefined;
+    self.postMessage({ id: req.id, puzzle, error: null, level });
   } catch (err) {
-    self.postMessage({ id: req.id, puzzle: null, error: String(err) });
+    const level = req.type === 'level' ? req.level : undefined;
+    self.postMessage({ id: req.id, puzzle: null, error: String(err), level });
   }
 };

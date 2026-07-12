@@ -368,7 +368,6 @@ export default function App() {
           currentLevel={state.level}
           onSelectLevel={handleSelectLevel}
           onClose={() => setShowLevelSelect(false)}
-          onGenerateLevel={getLevel}
         />
       )}
 
