@@ -494,15 +494,7 @@ export function useGame(initialPuzzle?: Puzzle) {
   const tickCountdown = useCallback(() => dispatch({ type: 'TICK_COUNTDOWN' }), []);
   const penalize = useCallback(() => dispatch({ type: 'APPLY_PENALTY' }), []);
 
-  const loadPuzzle = useCallback((p: Puzzle) =>
-    dispatch({ type: 'LOAD_PUZZLE', puzzle: p }), []);
-
-  // Puzzle-Generierung immer im Callback, nie im Reducer
-  const newPuzzle = useCallback((difficulty: import('../types').Difficulty = 'medium') => {
-    const p = generatePuzzle({ difficulty });
-    dispatch({ type: 'LOAD_PUZZLE', puzzle: p });
-  }, []);
-
+  // loadDaily bleibt für potenzielle Direktnutzung
   const loadDaily = useCallback((difficulty: import('../types').Difficulty = 'medium') => {
     const p = getDailyPuzzle(new Date(), difficulty);
     dispatch({ type: 'LOAD_PUZZLE', puzzle: p });
@@ -536,6 +528,27 @@ export function useGame(initialPuzzle?: Puzzle) {
     dispatch({ type: 'LOAD_CAMPAIGN_LEVEL', puzzle: p, level, resetLives: true, countdownDuration: countdownDuration ?? durationRef.current });
   }, []);
 
+  // Lädt ein extern (z. B. im Worker) generiertes Puzzle in den Spielzustand
+  const loadPuzzle = useCallback((puzzle: Puzzle) => {
+    dispatch({ type: 'LOAD_PUZZLE', puzzle });
+  }, []);
+
+  // Lädt ein extern generiertes Kampagnen-Puzzle
+  const loadCampaignPuzzle = useCallback((
+    puzzle: Puzzle,
+    level: number,
+    opts: { resetLives?: boolean; bonusReward?: boolean; countdownDuration?: number }
+  ) => {
+    dispatch({
+      type: 'LOAD_CAMPAIGN_LEVEL',
+      puzzle,
+      level,
+      resetLives:        opts.resetLives        ?? false,
+      bonusReward:       opts.bonusReward        ?? false,
+      countdownDuration: opts.countdownDuration  ?? durationRef.current,
+    });
+  }, []);
+
   const canUndo = state.historyIndex >= 0;
   const canRedo = state.historyIndex < state.history.length - 1;
 
@@ -553,7 +566,7 @@ export function useGame(initialPuzzle?: Puzzle) {
     resetLives,
     tick,
     loadPuzzle,
-    newPuzzle,
+    loadCampaignPuzzle,
     loadDaily,
     startCampaign,
     nextLevel,

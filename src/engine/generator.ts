@@ -290,6 +290,11 @@ export function getLevelDifficulty(level: number): Difficulty {
 /** Modul-level Cache: einmal generiert, nie wieder neu berechnet */
 const levelPuzzleCache = new Map<number, Puzzle>();
 
+/** Gibt gecachtes Level-Puzzle zurück, falls vorhanden – für Worker-Bypass im Main-Thread */
+export function getCachedLevelPuzzle(level: number): Puzzle | undefined {
+  return levelPuzzleCache.get(level);
+}
+
 export function generateLevelPuzzle(level: number): Puzzle {
   if (level <= MAX_CAMPAIGN_LEVEL) {
     const cached = levelPuzzleCache.get(level);

@@ -2,12 +2,13 @@
 // App – Root-Komponente
 // ============================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGame } from './hooks/useGame';
 import { useTimer } from './hooks/useTimer';
 import { useMusic } from './hooks/useMusic';
 import { useBoardSize } from './hooks/useBoardSize';
-import { generatePuzzle, prefetchLevelPuzzles } from './engine/generator';
+import { generatePuzzle, prefetchLevelPuzzles, getCachedLevelPuzzle } from './engine/generator';
+import type { Puzzle } from './types';
 
 // Kampagnen-Puzzles sofort im Hintergrund vorgenerieren
 prefetchLevelPuzzles();
@@ -109,17 +110,58 @@ export default function App() {
     applyHint,
     resetLives,
     tick,
-    newPuzzle,
-    loadDaily,
-    startCampaign,
-    nextLevel,
-    restartCampaign,
-    startCampaignFromLevel,
+    loadPuzzle,
+    loadCampaignPuzzle,
     tickCountdown,
     penalize,
     canUndo,
     canRedo,
   } = useGame(initialPuzzle);
+
+  // ── Web Worker für Puzzle-Generierung ──────────────────────
+  // Läuft komplett außerhalb des Main-Threads → keine UI-Freezes.
+  const workerRef = useRef<Worker | null>(null);
+  const pendingRef = useRef<Map<string, { resolve: (p: Puzzle) => void; reject: (e: Error) => void }>>(new Map());
+
+  useEffect(() => {
+    const w = new Worker(
+      new URL('./workers/puzzle.worker.ts', import.meta.url),
+      { type: 'module' }
+    );
+    w.onmessage = (e: MessageEvent<{ id: string; puzzle: Puzzle | null; error: string | null }>) => {
+      const { id, puzzle, error } = e.data;
+      const pending = pendingRef.current.get(id);
+      if (!pending) return;
+      pendingRef.current.delete(id);
+      if (error || !puzzle) pending.reject(new Error(error ?? 'Generation failed'));
+      else pending.resolve(puzzle);
+    };
+    workerRef.current = w;
+    return () => { w.terminate(); workerRef.current = null; };
+  }, []);
+
+  const workerPost = useCallback(<T extends object>(msg: T): Promise<Puzzle> =>
+    new Promise((resolve, reject) => {
+      const id = Math.random().toString(36).slice(2);
+      pendingRef.current.set(id, { resolve, reject });
+      workerRef.current?.postMessage({ id, ...msg });
+    }), []);
+
+  /** Async-Wrapper: zeigt Spinner, generiert im Worker, lädt Puzzle ohne UI-Freeze */
+  const gen = useCallback(async (work: () => Promise<void>) => {
+    if (isGenerating) return;
+    setIsGenerating(true);
+    try { await work(); }
+    catch (e) { console.error('Puzzle generation failed:', e); }
+    finally { setIsGenerating(false); }
+  }, [isGenerating]);
+
+  /** Level-Puzzle: Cache-Hit → synchron; sonst Worker */
+  const getLevel = useCallback(async (level: number): Promise<Puzzle> => {
+    const cached = getCachedLevelPuzzle(level);
+    if (cached) return cached;
+    return workerPost({ type: 'level', level });
+  }, [workerPost]);
 
   // Dynamische Zellgröße: passt --cell-size an Viewport + Puzzle-Größe an
   useBoardSize(state.puzzle.size);
@@ -137,15 +179,7 @@ export default function App() {
     return () => clearInterval(id);
   }, [countdownEnabled, state.campaignMode, state.won, state.gameOver, tickCountdown]);
 
-  // Puzzle-Generierung mit kurzem Delay, damit React zuerst re-rendern kann
-  const generate = (fn: () => void) => {
-    if (isGenerating) return;
-    setIsGenerating(true);
-    setTimeout(() => {
-      try { fn(); } catch (e) { console.error('Puzzle generation failed:', e); }
-      setIsGenerating(false);
-    }, 10);
-  };
+
 
   const handleToggleCountdown = () => setCountdownEnabled(v => !v);
   const handleToggleMusic = () => setMusicEnabled(v => !v);
@@ -163,27 +197,51 @@ export default function App() {
   });
 
   const handleSelectDifficulty = (difficulty: Difficulty) =>
-    generate(() => newPuzzle(difficulty));
+    gen(async () => {
+      const puzzle = await workerPost({ type: 'generate', options: { difficulty } });
+      loadPuzzle(puzzle);
+    });
 
   const handleNewPuzzle = (difficulty: Difficulty) =>
-    generate(() => newPuzzle(difficulty));
+    gen(async () => {
+      const puzzle = await workerPost({ type: 'generate', options: { difficulty } });
+      loadPuzzle(puzzle);
+    });
 
   const handleStartCampaign = () =>
-    generate(() => startCampaign(timerDuration));
+    gen(async () => {
+      const puzzle = await getLevel(1);
+      loadCampaignPuzzle(puzzle, 1, { resetLives: true, countdownDuration: timerDuration });
+    });
 
   const handleSelectLevel = (level: number) =>
-    generate(() => startCampaignFromLevel(level, timerDuration));
+    gen(async () => {
+      const puzzle = await getLevel(level);
+      loadCampaignPuzzle(puzzle, level, { resetLives: true, countdownDuration: timerDuration });
+    });
 
   const handleNextLevel = () =>
-    generate(() => nextLevel(timerDuration));
+    gen(async () => {
+      const completedLevel = state.level;
+      const nextLvl = completedLevel + 1;
+      const bonusReward = completedLevel > 0 && completedLevel % 5 === 0;
+      const puzzle = await getLevel(nextLvl);
+      loadCampaignPuzzle(puzzle, nextLvl, { resetLives: false, bonusReward, countdownDuration: timerDuration });
+    });
 
   const handleRestartCampaign = () =>
-    generate(() => restartCampaign(timerDuration));
+    gen(async () => {
+      const puzzle = await getLevel(1);
+      loadCampaignPuzzle(puzzle, 1, { resetLives: true, countdownDuration: timerDuration });
+    });
 
   const handleOpenDaily = () => setShowDaily(true);
   const handleSelectDaily = (difficulty: Difficulty) => {
-    generate(() => loadDaily(difficulty));
     setShowDaily(false);
+    gen(async () => {
+      const puzzle = await workerPost({ type: 'daily', difficulty });
+      loadPuzzle(puzzle);
+    });
   };
 
   const controlProps = {
