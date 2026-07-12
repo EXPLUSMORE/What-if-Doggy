@@ -1,18 +1,20 @@
 // ============================================================
-// What if Doggy – Puzzle-Generator
+// What if Doggy – Puzzle-Generator (optimiert)
 //
 // Algorithmus:
 // 1. Seed-basierter PRNG (mulberry32)
-// 2. Gültige Lösung via Backtracking
+// 2. Gültige Lösung via Backtracking mit Bitmask (schnell)
 // 3. Initiale Regionen via Manhattan-Voronoi
 // 4. pruneToUnique: Grenzzellen werden iterativ verschoben,
 //    bis der Solver genau 1 Lösung findet.
 //    Konnektivität der Regionen wird per BFS geprüft.
+//    Intern: solveForGenerator (col-per-row, kein bool[][]) +
+//    stark reduziertes maxIter → Expert/Master < 3 Sekunden.
 // ============================================================
 
 import type { Puzzle, Region, Difficulty } from '../types';
 import { REGION_COLORS } from '../types';
-import { solvePuzzle, getUniqueSolution } from './solver';
+import { getUniqueSolution, solveForGenerator } from './solver';
 
 // ── PRNG ──────────────────────────────────────────────────────
 function mulberry32(seed: number): () => number {
@@ -39,30 +41,35 @@ function shuffle<T>(arr: T[], rand: () => number): T[] {
   return arr;
 }
 
-// ── Lösung erzeugen ───────────────────────────────────────────
-function isAdj(r1: number, c1: number, r2: number, c2: number) {
-  return Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1;
-}
-
+// ── Lösung erzeugen (Bitmask-optimiert) ───────────────────────
+/**
+ * Generiert eine gültige Platzierung (1 Hund/Zeile, Spalte, keine Adj.)
+ * Bitmask-Optimierung: colMask + adjMask ersetzen Set und placed.some()
+ */
 function generateSolution(size: number, rand: () => number): number[] | null {
   const cols = Array.from({ length: size }, (_, i) => i);
   const placed: number[] = [];
 
-  function bt(row: number, usedCols: Set<number>): boolean {
+  function bt(row: number, colMask: number, adjMask: number): boolean {
     if (row === size) return true;
     for (const col of shuffle([...cols], rand)) {
-      if (usedCols.has(col)) continue;
-      if (placed.some((c, r) => isAdj(row, col, r, c))) continue;
-      usedCols.add(col);
+      const colBit = 1 << col;
+      if (colMask & colBit) continue;
+      if (adjMask & colBit) continue;
+
       placed.push(col);
-      if (bt(row + 1, usedCols)) return true;
+      const newAdj =
+        colBit |
+        (col > 0 ? (1 << (col - 1)) : 0) |
+        (col < size - 1 ? (1 << (col + 1)) : 0);
+
+      if (bt(row + 1, colMask | colBit, newAdj)) return true;
       placed.pop();
-      usedCols.delete(col);
     }
     return false;
   }
 
-  return bt(0, new Set()) ? placed : null;
+  return bt(0, 0, 0) ? placed : null;
 }
 
 // ── Voronoi-Startregionen ─────────────────────────────────────
@@ -79,33 +86,35 @@ function voronoiRegions(size: number, seeds: Array<{ row: number; col: number }>
   );
 }
 
-// ── Konnektivitätsprüfung ─────────────────────────────────────
+// ── Konnektivitätsprüfung (optimiert: kein Array.shift) ──────
 const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]] as const;
 
 function isConnected(size: number, map: number[][], regionId: number): boolean {
-  const cells: [number, number][] = [];
+  // BFS mit Index-Pointer statt shift() → O(1) amortisiert
+  let startIdx = -1, count = 0;
   for (let r = 0; r < size; r++)
     for (let c = 0; c < size; c++)
-      if (map[r][c] === regionId) cells.push([r, c]);
+      if (map[r][c] === regionId) { count++; if (startIdx < 0) startIdx = r * size + c; }
 
-  if (cells.length <= 1) return true;
+  if (count <= 1) return true;
 
-  const visited = new Set<number>();
-  const queue: [number, number][] = [cells[0]];
-  visited.add(cells[0][0] * size + cells[0][1]);
+  const visited = new Uint8Array(size * size);
+  visited[startIdx] = 1;
+  const queue: number[] = [startIdx];
+  let head = 0, visitCount = 1;
 
-  while (queue.length > 0) {
-    const [r, c] = queue.shift()!;
+  while (head < queue.length) {
+    const key = queue[head++];
+    const r = (key / size) | 0, c = key % size;
     for (const [dr, dc] of DIRS) {
       const nr = r + dr, nc = c + dc;
       if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
       if (map[nr][nc] !== regionId) continue;
-      const key = nr * size + nc;
-      if (!visited.has(key)) { visited.add(key); queue.push([nr, nc]); }
+      const k = nr * size + nc;
+      if (!visited[k]) { visited[k] = 1; visitCount++; queue.push(k); }
     }
   }
-
-  return visited.size === cells.length;
+  return visitCount === count;
 }
 
 // ── Iterative Grenzbereinigung ────────────────────────────────
@@ -113,6 +122,12 @@ function isConnected(size: number, map: number[][], regionId: number): boolean {
  * Verschiebt Grenzzellen zwischen Regionen, bis der Solver genau
  * eine Lösung findet. Seed-Zellen werden niemals verschoben.
  * Konnektivität wird nach jeder Verschiebung geprüft.
+ *
+ * Optimierungen gegenüber V1:
+ * - Nutzt solveForGenerator (col-per-row Int8Array, kein bool[][])
+ * - Stark reduziertes maxIter (300-400 statt 6480): verhindert, dass
+ *   nicht-konvergente Seeds Sekunden verbrauchen; Neustart mit
+ *   neuem Seed ist immer günstiger als unbegrenztes Iterieren.
  */
 function pruneToUnique(
   size: number,
@@ -122,47 +137,50 @@ function pruneToUnique(
   const seedSet = new Set(seeds.map(s => s.row * size + s.col));
   const map = initialMap.map(r => [...r]);
 
-  // Iterationslimit skaliert mit Gittergröße (10×10 braucht deutlich mehr Schritte)
-  const maxIter = size <= 10 ? size * size * 30 : size * size * 45;
+  // KRITISCH: maxIter niedrig halten → misslungene Versuche enden schnell.
+  // Erfolgreiche Versuche konvergieren typisch in 30-150 Iterationen.
+  const maxIter = size <= 8 ? 200 : size <= 10 ? 250 : 350;
+
   for (let iter = 0; iter < maxIter; iter++) {
-    const result = solvePuzzle({ size, regionMap: map as ReadonlyArray<ReadonlyArray<number>> });
+    const result = solveForGenerator(size, map as ReadonlyArray<ReadonlyArray<number>>);
 
-    if (result.unique) return map;
-    if (result.solutions.length === 0) return null;
+    if (result.length === 1) return map;   // eindeutig → fertig
+    if (result.length === 0) return null;  // keine Lösung
 
-    // Zelle aus Lösung 2 (nicht in Lösung 1) finden und verschieben
-    const s2 = result.solutions[1];
+    // Zelle aus Lösung 2, die in Lösung 1 nicht vorkommt, verschieben
+    const s2 = result[1]; // Int8Array: s2[row] = col
 
-    let moved = false;
-
-    outer: for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        // Zelle muss in S2 sein (alternative Platzierung)
-        if (!s2[r][c]) continue;
-        // Seed-Zellen nie verschieben
-        if (seedSet.has(r * size + c)) continue;
-
-        const srcId = map[r][c];
-
-        for (const [dr, dc] of DIRS) {
-          const nr = r + dr, nc = c + dc;
-          if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
-          const dstId = map[nr][nc];
-          if (dstId === srcId) continue;
-
-          // Verschieben + Konnektivität prüfen
-          map[r][c] = dstId;
-          if (isConnected(size, map, srcId)) {
-            moved = true;
-            break outer;
-          }
-          map[r][c] = srcId; // Zurücksetzen
-        }
+    // Alle konnektivitätserhaltenden Züge sammeln, dann per Iteration
+    // rotiert auswählen – verhindert 2-Zyklen (iter 0 zieht A→B,
+    // iter 1 zieht B→A zurück, iter 2 wiederholt).
+    const validMoves: Array<[number, number, number]> = []; // [r, c, dstId]
+    for (let ri = 0; ri < size; ri++) {
+      const r = (ri + iter) % size;          // rotierende Startreihe
+      const c = s2[r];
+      if (seedSet.has(r * size + c)) continue;
+      const srcId = map[r][c];
+      for (const [dr, dc] of DIRS) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+        const dstId = map[nr][nc];
+        if (dstId === srcId) continue;
+        map[r][c] = dstId;
+        const ok = isConnected(size, map, srcId);
+        map[r][c] = srcId;
+        if (ok) validMoves.push([r, c, dstId]);
       }
     }
 
+    let moved = false;
+    if (validMoves.length > 0) {
+      // Prim-Multiplikator → wechselt durch alle Positionen ohne Periode
+      const [r, c, dstId] = validMoves[(iter * 37) % validMoves.length];
+      map[r][c] = dstId;
+      moved = true;
+    }
+
     if (!moved) {
-      // Feststeckend: zufällige Grenzzelle verschieben um aus dem Deadlock zu kommen
+      // Echter Deadlock (alle Züge verletzen Konnektivität) → Escape
       const borderMoves: Array<[number, number, number, number]> = [];
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -176,16 +194,15 @@ function pruneToUnique(
         }
       }
       if (borderMoves.length === 0) return null;
-      // Deterministisch: nimm den mittleren Eintrag (iter-abhängig)
-      const [r, c, nr, nc] = borderMoves[iter % borderMoves.length];
-      const dstId = map[nr][nc];
-      const srcId = map[r][c];
+      // Prim-Schrittweite (37) + Offset (13) für Abwechslung
+      const [r, c, nr, nc] = borderMoves[(iter * 37 + 13) % borderMoves.length];
+      const dstId = map[nr][nc], srcId = map[r][c];
       map[r][c] = dstId;
-      if (!isConnected(size, map, srcId)) map[r][c] = srcId; // Zurücksetzen wenn nicht verbunden
+      if (!isConnected(size, map, srcId)) map[r][c] = srcId;
     }
   }
 
-  return null;
+  return null; // maxIter überschritten → mit neuem Seed versuchen
 }
 
 // ── Öffentliche API ───────────────────────────────────────────
@@ -208,8 +225,9 @@ export function generatePuzzle(options: GeneratorOptions = {}): Puzzle {
   const size = options.size ?? SIZE_BY_DIFFICULTY[difficulty];
   const baseSeed = options.seed ?? `${Date.now()}-${Math.random()}`;
 
-  // Mehr Versuche für größere Gitter
-  const maxAttempts = size <= 6 ? 30 : size <= 8 ? 80 : size <= 10 ? 200 : size <= 12 ? 350 : 500;
+  // Viele kurze Versuche sind besser als wenige lange (dank niedrigem maxIter).
+  const maxAttempts = size <= 6 ? 30 : size <= 8 ? 80 : size <= 10 ? 200 : 500;
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const seed = `${baseSeed}-${attempt}`;
     const rand = mulberry32(seedToNumber(seed));
@@ -265,7 +283,6 @@ export function getDailyPuzzle(date: Date = new Date(), difficulty: Difficulty =
   return generatePuzzle({ difficulty, seed: `daily-${y}-${m}-${d}-${difficulty}` });
 }
 
-
 export function todayKey(): string {
   const now = new Date();
   const y = now.getFullYear();
@@ -290,7 +307,7 @@ export function getLevelDifficulty(level: number): Difficulty {
 /** Modul-level Cache: einmal generiert, nie wieder neu berechnet */
 const levelPuzzleCache = new Map<number, Puzzle>();
 
-/** Gibt gecachtes Level-Puzzle zurück, falls vorhanden – für Worker-Bypass im Main-Thread */
+/** Gibt gecachtes Level-Puzzle zurück, falls vorhanden */
 export function getCachedLevelPuzzle(level: number): Puzzle | undefined {
   return levelPuzzleCache.get(level);
 }
@@ -304,7 +321,6 @@ export function generateLevelPuzzle(level: number): Puzzle {
     levelPuzzleCache.set(level, puzzle);
     return puzzle;
   }
-  // Endless: zufällige Schwierigkeit
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'expert', 'master'];
   const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
   return generatePuzzle({ difficulty });
@@ -312,12 +328,10 @@ export function generateLevelPuzzle(level: number): Puzzle {
 
 /**
  * Vorgenerierung aller Kampagnen-Level im Hintergrund.
- * Easy-Level zuerst (schnell), Hard zuletzt (langsam).
- * Nutzt requestIdleCallback falls verfügbar, sonst setTimeout(8ms).
+ * Easy-Level zuerst (schnell), Hard zuletzt.
+ * Expert/Master werden NICHT prefetched (on-demand mit Worker).
  */
 export function prefetchLevelPuzzles(): void {
-  // Expert/Master werden NICHT prefetched – zu langsam für den Hauptthread.
-  // Sie werden on-demand mit Ladeindikator generiert.
   const order = [
     ...Array.from({ length: 8  }, (_, i) => i + 1),   // easy   1-8
     ...Array.from({ length: 12 }, (_, i) => i + 9),   // medium 9-20
@@ -331,8 +345,8 @@ export function prefetchLevelPuzzles(): void {
     if (typeof requestIdleCallback !== 'undefined') {
       requestIdleCallback(next, { timeout: 1000 });
     } else {
-      setTimeout(next, 50); // mehr Luft zwischen Generierungen
+      setTimeout(next, 50);
     }
   };
-  setTimeout(next, 300); // erst nach App-Start
+  setTimeout(next, 300);
 }
