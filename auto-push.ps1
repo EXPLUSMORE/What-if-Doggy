@@ -1,5 +1,4 @@
-# auto-push.ps1 - Laeuft im Hintergrund via Windows Task Scheduler
-# Committet und pusht automatisch alle Aenderungen im What if Doggy Projekt
+# auto-push.ps1 - Laeuft via Windows Task Scheduler alle 10 Minuten
 
 $projectPath = 'C:\Users\ch\Claude\Projects\What if Doggy'
 $logFile     = Join-Path $projectPath 'auto-push.log'
@@ -9,49 +8,53 @@ function Log($msg) {
     Add-Content -Path $logFile -Value "[$ts] $msg"
 }
 
-function Invoke-Git {
-    param([string[]]$gitArgs)
+function Invoke-Git([string[]]$gitArgs) {
     $out = & git @gitArgs 2>&1
-    return [PSCustomObject]@{ Output = $out -join "`n"; Ok = ($LASTEXITCODE -eq 0) }
+    # Nur echter Fehler (Exit != 0); Warnings (CRLF etc.) ignorieren
+    $errors = $out | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+    $text   = ($out | ForEach-Object { "$_" }) -join "`n"
+    return [PSCustomObject]@{ Output = $text; Ok = ($LASTEXITCODE -eq 0); Errors = $errors }
 }
 
 Set-Location $projectPath
+Log "Gestartet"
 
 if (-not (Test-Path '.git')) {
-    Log "FEHLER: Kein Git-Repository in $projectPath"
+    Log "FEHLER: Kein Git-Repository"
     exit 1
 }
 
-# Lock-Handling: verhindert Konflikte wenn Sandbox oder anderer Prozess git benutzt.
-# Junger Lock (< 60s) = anderer Prozess laeuft gerade  -> ruhig abwarten, nichts tun.
-# Alter Lock  (> 60s) = Crash-Ueberbleibsel            -> aufraumen und weitermachen.
+# Lock-Handling:
+#   Lock < 60s  -> anderer Prozess laeuft gerade -> abwarten, ruhig beenden
+#   Lock >= 60s -> Crash-Ueberbleibsel           -> aufraumen und weitermachen
 $lockFiles = @('.git\index.lock', '.git\HEAD.lock', '.git\refs\heads\main.lock')
 foreach ($lockFile in $lockFiles) {
     $lockPath = Join-Path $projectPath $lockFile
     if (Test-Path $lockPath) {
         $age = (Get-Date) - (Get-Item $lockPath).LastWriteTime
         if ($age.TotalSeconds -lt 60) {
-            # Aktiver Prozess - nicht stoeren
+            Log "Uebersprungen: aktiver Lock '$lockFile' ($([int]$age.TotalSeconds)s alt)"
             exit 0
         }
-        # Staler Lock - entfernen
         Remove-Item -Force $lockPath -ErrorAction SilentlyContinue
-        Log "Staler Lock entfernt: $lockFile ($([int]$age.TotalSeconds)s alt)"
+        Log "Staler Lock entfernt: '$lockFile' ($([int]$age.TotalSeconds)s alt)"
     }
 }
 
 # Aenderungen vorhanden?
 $status = (& git status --porcelain 2>&1) -join ''
 if ([string]::IsNullOrWhiteSpace($status)) {
+    Log "Keine Aenderungen"
     exit 0
 }
 
-# Staging
+# Staging (CRLF-Warnings werden unterdrueckt)
 & git add -A 2>&1 | Out-Null
 
-# Pruefen ob nach Staging wirklich etwas staged ist
+# Nichts staged?
 & git diff --cached --quiet 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) {
+    Log "Keine Aenderungen (nach Staging)"
     exit 0
 }
 
