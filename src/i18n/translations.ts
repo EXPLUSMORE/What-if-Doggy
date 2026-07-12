@@ -104,11 +104,11 @@ export const translations = {
       start:  "Los geht's!",
       cancel: 'Abbrechen',
       options: [
-        { label: 'Einfach',  desc: '6x6 Gitter - perfekt zum Aufwaermen' },
+        { label: 'Einfach',  desc: '6x6 Gitter - perfekt zum Aufwärmen' },
         { label: 'Mittel',   desc: '8x8 Gitter - die klassische Herausforderung' },
-        { label: 'Schwer',   desc: '10x10 Gitter - fuer Profis' },
-        { label: 'Experte',  desc: '12x12 Gitter - fuer Kenner' },
-        { label: 'Meister',  desc: '13x13 Gitter - fuer absolute Profis' },
+        { label: 'Schwer',   desc: '10x10 Gitter - für Profis' },
+        { label: 'Experte',  desc: '12x12 Gitter - für Kenner' },
+        { label: 'Meister',  desc: '13x13 Gitter - für absolute Profis' },
       ],
     },
     rules: {
@@ -124,12 +124,12 @@ export const translations = {
         {
           icon: '🎨',
           heading: 'Eine Region, ein Hund',
-          body: 'Jede farbige Region enthaelt genau <b>einen</b> Hund.',
+          body: 'Jede farbige Region enthält genau <b>einen</b> Hund.',
         },
         {
           icon: '🚫',
           heading: 'Kein Kontakt',
-          body: 'Zwei Hunde duerfen sich <b>nicht beruehren</b> – auch nicht diagonal.',
+          body: 'Zwei Hunde dürfen sich <b>nicht berühren</b> – auch nicht diagonal.',
         },
         {
           icon: '👆',
@@ -139,7 +139,7 @@ export const translations = {
         {
           icon: '🔮',
           heading: 'What-if-Modus',
-          body: 'Ideen testen ohne das Spiel zu veraendern. Alle What-if-Zuege erscheinen orange und werden beim Deaktivieren verworfen.',
+          body: 'Ideen testen ohne das Spiel zu verändern. Alle What-if-Züge erscheinen orange und werden beim Deaktivieren verworfen.',
         },
         {
           icon: '💡',
@@ -213,7 +213,7 @@ export const translations = {
       close:     'Schließen',
       button:    '🔍 Lösung',
       searching: 'Suche Lösungen...',
-      campaignWarning: '⚠️ Im Kampagnen-Modus kostet das Anschauen der Lösung einen Knochen (oder ein Leben). Wirklich anzeigen?',
+      campaignWarning: '⚠️ Im Kampagnen-Modus kostet das Anschauen der Lösung einen Knochen. Wirklich anzeigen?',
     },
   },
 
