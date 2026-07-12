@@ -150,37 +150,30 @@ function pruneToUnique(
     // Zelle aus Lösung 2, die in Lösung 1 nicht vorkommt, verschieben
     const s2 = result[1]; // Int8Array: s2[row] = col
 
-    // Alle konnektivitätserhaltenden Züge sammeln, dann per Iteration
-    // rotiert auswählen – verhindert 2-Zyklen (iter 0 zieht A→B,
-    // iter 1 zieht B→A zurück, iter 2 wiederholt).
-    const validMoves: Array<[number, number, number]> = []; // [r, c, dstId]
-    for (let ri = 0; ri < size; ri++) {
-      const r = (ri + iter) % size;          // rotierende Startreihe
+    // Rotierende Startreihe verhindert 2-Zyklen:
+    // iter 0 wählt row 0 zuerst, iter 1 wählt row 1 zuerst usw. →
+    // dieselbe Zelle wird nie zwei Mal in Folge verschoben.
+    let moved = false;
+    outer: for (let ri = 0; ri < size; ri++) {
+      const r = (ri + iter) % size;
       const c = s2[r];
       if (seedSet.has(r * size + c)) continue;
+
       const srcId = map[r][c];
       for (const [dr, dc] of DIRS) {
         const nr = r + dr, nc = c + dc;
         if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
         const dstId = map[nr][nc];
         if (dstId === srcId) continue;
+
         map[r][c] = dstId;
-        const ok = isConnected(size, map, srcId);
-        map[r][c] = srcId;
-        if (ok) validMoves.push([r, c, dstId]);
+        if (isConnected(size, map, srcId)) { moved = true; break outer; }
+        map[r][c] = srcId; // rückgängig
       }
     }
 
-    let moved = false;
-    if (validMoves.length > 0) {
-      // Prim-Multiplikator → wechselt durch alle Positionen ohne Periode
-      const [r, c, dstId] = validMoves[(iter * 37) % validMoves.length];
-      map[r][c] = dstId;
-      moved = true;
-    }
-
     if (!moved) {
-      // Echter Deadlock (alle Züge verletzen Konnektivität) → Escape
+      // Deadlock → Grenzzelle verschieben (Prim-Schrittweite für Abwechslung)
       const borderMoves: Array<[number, number, number, number]> = [];
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -194,7 +187,6 @@ function pruneToUnique(
         }
       }
       if (borderMoves.length === 0) return null;
-      // Prim-Schrittweite (37) + Offset (13) für Abwechslung
       const [r, c, nr, nc] = borderMoves[(iter * 37 + 13) % borderMoves.length];
       const dstId = map[nr][nc], srcId = map[r][c];
       map[r][c] = dstId;
