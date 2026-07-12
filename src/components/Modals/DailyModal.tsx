@@ -16,6 +16,8 @@ const DIFFICULTIES: { difficulty: Difficulty; emoji: string }[] = [
   { difficulty: 'easy',   emoji: '🐾' },
   { difficulty: 'medium', emoji: '🦴' },
   { difficulty: 'hard',   emoji: '🏆' },
+  { difficulty: 'expert', emoji: '🧠' },
+  { difficulty: 'master', emoji: '👑' },
 ];
 
 export function DailyModal({ onSelect, onClose }: DailyModalProps) {

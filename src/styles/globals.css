@@ -43,6 +43,11 @@
   --region-7: hsl(330, 80%, 65%);   /* Pink      */
   --region-8: hsl(200, 80%, 55%);   /* Hellblau  */
   --region-9: hsl(100, 65%, 52%);   /* Hellgrün  */
+  --region-10: hsl(21,  85%, 62%);   /* Lachs     */
+  --region-11: hsl(247, 68%, 65%);   /* Indigo    */
+  --region-12: hsl(305, 72%, 62%);   /* Magenta   */
+  --region-13: hsl(80,  78%, 48%);   /* Limette   */
+  --region-14: hsl(163, 62%, 52%);   /* Mint      */
 }
 
 /* ── Candy Pop ─────────────────────────────────────────────── */
@@ -56,7 +61,12 @@
   --region-6: #FFD93D;   /* Bananengelb*/
   --region-7: #4D96FF;   /* Blauberry  */
   --region-8: #FF6633;   /* Mandarinen */
-  --region-9: #00CC88;   /* Spearmint  */
+  --region-9: #00CC88;   /* Spearmint   */
+  --region-10: #FF8C42;  /* Tangerine   */
+  --region-11: #7B68EE;  /* Indigo      */
+  --region-12: #FF4DA6;  /* Magenta     */
+  --region-13: #84D832;  /* Lime        */
+  --region-14: #20C3A0;  /* Mint        */
 }
 
 /* ── Jewel Pastel ──────────────────────────────────────────── */
@@ -71,6 +81,11 @@
   --region-7: #F5A8D5;   /* Fuchsia pastel  */
   --region-8: #B0D4F5;   /* Aquamarin past. */
   --region-9: #F5C5A8;   /* Koralle pastel  */
+  --region-10: #F5C8A8;  /* Pfirsich pastel */
+  --region-11: #B8A8E5;  /* Indigo pastel   */
+  --region-12: #F0A8D5;  /* Magenta pastel  */
+  --region-13: #C8E8A0;  /* Limette pastel  */
+  --region-14: #A0DCC0;  /* Mint pastel     */
 }
 
 /* ── Neon Night ────────────────────────────────────────────── */
@@ -84,7 +99,12 @@
   --region-6: #FFE45A;   /* Neon-Gelb    */
   --region-7: #FF6B9D;   /* Neon-Pink    */
   --region-8: #00E5CC;   /* Neon-Türkis  */
-  --region-9: #AAFF45;   /* Neon-Grün    */
+  --region-9: #AAFF45;   /* Neon-Grün      */
+  --region-10: #FF8A45;  /* Neon-Mandarine */
+  --region-11: #8A7BFF;  /* Neon-Indigo    */
+  --region-12: #FF45B8;  /* Neon-Magenta   */
+  --region-13: #AAFF1A;  /* Neon-Limette   */
+  --region-14: #1AFFCC;  /* Neon-Mint      */
 }
 
 /* Dark mode via system preference */
@@ -366,15 +386,21 @@ body {
 .difficulty--easy   { background: #dcfce7; color: #166534; }
 .difficulty--medium { background: #fef9c3; color: #854d0e; }
 .difficulty--hard   { background: #fee2e2; color: #991b1b; }
+.difficulty--expert { background: #ede9fe; color: #5b21b6; }
+.difficulty--master { background: #e0f2fe; color: #0c4a6e; }
 
 [data-theme="dark"] .difficulty--easy   { background: #14532d; color: #86efac; }
 [data-theme="dark"] .difficulty--medium { background: #713f12; color: #fde68a; }
 [data-theme="dark"] .difficulty--hard   { background: #7f1d1d; color: #fca5a5; }
+[data-theme="dark"] .difficulty--expert { background: #3b0764; color: #c4b5fd; }
+[data-theme="dark"] .difficulty--master { background: #0c1a3a; color: #7dd3fc; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .difficulty--easy   { background: #14532d; color: #86efac; }
   :root:not([data-theme="light"]) .difficulty--medium { background: #713f12; color: #fde68a; }
   :root:not([data-theme="light"]) .difficulty--hard   { background: #7f1d1d; color: #fca5a5; }
+  :root:not([data-theme="light"]) .difficulty--expert { background: #3b0764; color: #c4b5fd; }
+  :root:not([data-theme="light"]) .difficulty--master { background: #0c1a3a; color: #7dd3fc; }
 }
 
 /* ── Game Board ─────────────────────────────────────────────── */
@@ -872,8 +898,8 @@ body {
 
 /* ── Level Select Modal ─────────────────────────────────────── */
 .level-select-modal {
-  /* Breiter als normale Modals: 6-Spalten-Grid passt ohne Scroll */
-  max-width: min(520px, 96vw);
+  /* 50 Level: breiteres Modal + scrollbare Grid-Zone */
+  max-width: min(580px, 96vw);
   padding: 1.25rem 1rem;
   text-align: center;
   overflow-y: visible;
@@ -881,8 +907,12 @@ body {
 
 .level-select-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: .35rem;
+  grid-template-columns: repeat(10, 1fr);
+  gap: .3rem;
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: .15rem .1rem;
 }
 
 .level-card {
@@ -925,7 +955,28 @@ body {
   line-height: 1;
 }
 
-@media (max-width: 520px) {
+.level-select-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem .9rem;
+  margin-top: .6rem;
+  font-size: .73rem;
+  color: var(--text-muted);
+}
+.level-select-legend__item {
+  display: flex;
+  align-items: center;
+  gap: .28rem;
+}
+.level-select-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
   .level-select-modal { max-width: 98vw; padding: .85rem .5rem; }
   .level-select-grid {
     grid-template-columns: repeat(5, 1fr);

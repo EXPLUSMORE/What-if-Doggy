@@ -12,7 +12,9 @@ interface LevelSelectModalProps {
 function getLevelDifficulty(level: number): Difficulty {
   if (level <= 8)  return 'easy';
   if (level <= 20) return 'medium';
-  return 'hard';
+  if (level <= 30) return 'hard';
+  if (level <= 40) return 'expert';
+  return 'master';
 }
 
 function MiniPuzzle({ puzzle }: { puzzle: Puzzle }) {
@@ -47,6 +49,7 @@ function MiniSkeleton({ size }: { size: number }) {
 
 const DIFF_DOT: Record<Difficulty, string> = {
   easy: '#22c55e', medium: '#eab308', hard: '#ef4444',
+  expert: '#8b5cf6', master: '#0ea5e9',
 };
 
 export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: LevelSelectModalProps) {
@@ -90,7 +93,7 @@ export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: Level
           {Array.from({ length: MAX_CAMPAIGN_LEVEL }, (_, i) => {
             const level = i + 1;
             const diff = getLevelDifficulty(level);
-            const size = level <= 8 ? 6 : level <= 20 ? 8 : 10;
+            const size = level <= 8 ? 6 : level <= 20 ? 8 : level <= 30 ? 10 : level <= 40 ? 12 : 15;
             const puzzle = puzzles[i];
             const isCurrent = level === currentLevel;
             return (
@@ -104,6 +107,15 @@ export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: Level
               </button>
             );
           })}
+        </div>
+        {/* Legende */}
+        <div className="level-select-legend">
+          {(['easy','medium','hard','expert','master'] as const).map(d => (
+            <span key={d} className="level-select-legend__item">
+              <span className="level-select-legend__dot" style={{ background: DIFF_DOT[d] }} />
+              {t.difficulty[d]}
+            </span>
+          ))}
         </div>
         <div className="modal__actions" style={{ marginTop: '.8rem' }}>
           <button className="btn" onClick={onClose}>{t.levelSelect.cancel}</button>

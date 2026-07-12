@@ -23,9 +23,8 @@ const V_RESERVE_DESKTOP = 270;  // px: etwas mehr wegen größerem Header
 const H_PAD_MOBILE  = 16;   // .5rem je Seite
 const H_PAD_DESKTOP = 48;   // 1.5rem je Seite
 
-/** Grenzen für Zellgröße */
-const CELL_MIN = 22;   // px – kleinste sinnvolle Touch-/Klickfläche
-const CELL_MAX = 60;   // px – größte sinnvolle Zelle auf Desktop
+/** Maximale Zellgröße auf Desktop */
+const CELL_MAX = 60;
 
 export function useBoardSize(puzzleSize: number): void {
   useEffect(() => {
@@ -47,7 +46,9 @@ export function useBoardSize(puzzleSize: number): void {
       // Optimal: kleineres von Breiten- und Höhenlimit
       const fromW = availW / n;
       const fromH = availH / n;
-      const cell  = Math.min(CELL_MAX, Math.max(CELL_MIN, Math.floor(Math.min(fromW, fromH))));
+      // Minimale Zellgröße: für große Gitter (12×12, 15×15) erlauben wir kleinere Zellen
+      const cellMin = n <= 10 ? 22 : n <= 12 ? 18 : 14;
+      const cell  = Math.min(CELL_MAX, Math.max(cellMin, Math.floor(Math.min(fromW, fromH))));
 
       const root = document.documentElement;
       root.style.setProperty('--cell-size',    `${cell}px`);

@@ -33,7 +33,7 @@ function getInitialDark(): boolean {
   return true;
 }
 
-const DIFFICULTY_CYCLE: Difficulty[] = ['easy', 'medium', 'hard'];
+const DIFFICULTY_CYCLE: Difficulty[] = ['easy', 'medium', 'hard', 'expert', 'master'];
 
 export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(getInitialDark);
