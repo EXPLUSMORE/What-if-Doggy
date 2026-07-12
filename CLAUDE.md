@@ -98,10 +98,23 @@ Nichts — das Projekt ist vollständig. Nach `npm install` ist alles startberei
 Backtracking Zeile für Zeile. Für jede Zeile werden Spalten als Kandidaten geprüft: Spalte frei? Region frei? Kein adjazenter Hund? Lösungen werden gezählt, bei > 1 bricht der Solver ab. Das garantiert Eindeutigkeit ohne vollständige Enumeration.
 
 ### Generator-Strategie
-1. Zufällige Lösung via Fisher-Yates + Backtracking
+1. Zufällige Lösung via Fisher-Yates + Backtracking (Bitmask-optimiert)
 2. Voronoi-Flood-Fill: Jede Lösung-Zelle ist Seed einer Region, wächst in alle 4 Richtungen
-3. Solver-Check: nur Puzzles mit eindeutiger Lösung werden ausgegeben
-4. Seed-basiert (mulberry32 PRNG) → reproduzierbare Puzzles, Tagesrätsel deterministisch
+3. `pruneToUnique`: Grenzzellen iterativ verschieben bis Solver genau 1 Lösung findet.
+   - Rotierende Startreihe (iter % size) verhindert 2-Zyklen im Pruning
+   - Prim-Schrittweite (37) im Escape-Modus für zusätzliche Abwechslung
+   - maxIter = 250 für alle Größen: begrenzt Fehlschläge auf < 875 ms/Versuch
+4. Solver-Check: nur Puzzles mit eindeutiger Lösung werden ausgegeben
+5. Seed-basiert (mulberry32 PRNG) → reproduzierbare Puzzles, Tagesrätsel deterministisch
+
+### Schwierigkeitsgrade & Gittergrößen
+| Schwierigkeit | Größe | Generierungszeit (avg/max) |
+|---|---|---|
+| Easy   | 6×6   | < 1 ms / < 1 ms   |
+| Medium | 8×8   | < 10 ms / < 15 ms |
+| Hard   | 10×10 | < 30 ms / < 50 ms |
+| Expert | 11×11 | ~ 170 ms / < 1 s  |
+| Master | 12×12 | ~ 900 ms / < 5 s  |
 
 ### What-if-Modus
 Alle Züge im What-if-Modus bekommen `source: 'whatif'`. Beim Deaktivieren werden alle `whatif`-Züge aus dem Grid gelöscht. Undo/Redo arbeitet auf dem normalen History-Stack, What-if hat keinen eigenen Stack (wird komplett verworfen).
