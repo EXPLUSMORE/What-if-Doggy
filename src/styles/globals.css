@@ -312,7 +312,15 @@ body {
 .header__life-icon {
   font-size: 1.15rem;
   line-height: 1;
-  transition: opacity .3s, filter .3s;
+}
+
+/* Hund-Fortschritts-Counter: "3/8" neben dem Hund-Emoji */
+.header__dog-counter {
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--text);
+  line-height: 1;
 }
 
 .header__bone-icon {

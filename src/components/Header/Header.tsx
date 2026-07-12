@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useLang } from '../../i18n/LanguageContext';
-import { MAX_LIVES, MAX_BONES } from '../../hooks/useGame';
+import { MAX_BONES } from '../../hooks/useGame';
 import { MAX_CAMPAIGN_LEVEL } from '../../engine/generator';
 import type { Difficulty } from '../../types';
 
@@ -13,7 +13,8 @@ interface HeaderProps {
   difficulty: Difficulty;
   onSelectDifficulty: (d: Difficulty) => void;
   onOpenSettings: () => void;
-  lives: number;
+  dogsPlaced: number;
+  puzzleSize: number;
   bones: number;
   campaignMode?: boolean;
   level?: number;
@@ -25,7 +26,8 @@ interface HeaderProps {
 export function Header({
   difficulty,
   onSelectDifficulty,
-  lives,
+  dogsPlaced,
+  puzzleSize,
   bones,
   campaignMode = false,
   level = 0,
@@ -50,20 +52,13 @@ export function Header({
       {/* Zeile 2: Lives | Bones | [Level] | sep | Difficulty Dropdown | sep | Settings */}
       <div className="header__meta">
 
-        {/* Leben-Pill */}
-        <div className="header__stat-pill" aria-label={`${lives} ${t.header.livesLabel}`}>
+        {/* Hund-Fortschritt-Pill */}
+        <div className="header__stat-pill" aria-label={`${dogsPlaced} von ${puzzleSize} Hunden platziert`}>
           <div className="header__stat-icons">
-            {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <span
-                key={i}
-                className="header__life-icon"
-                style={{ opacity: i < lives ? 1 : 0.2, filter: i < lives ? 'none' : 'grayscale(1)' }}
-              >
-                🐕
-              </span>
-            ))}
+            <span className="header__life-icon">🐕</span>
+            <span className="header__dog-counter">{dogsPlaced}/{puzzleSize}</span>
           </div>
-          <span className="header__stat-label">{t.header.livesLabel}</span>
+          <span className="header__stat-label">{t.header.dogsLabel}</span>
         </div>
 
         {/* Fehler-Pill */}

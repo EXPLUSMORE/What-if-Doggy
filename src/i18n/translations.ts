@@ -18,7 +18,7 @@ export const translations = {
       lightMode:     'Light Mode aktivieren',
       darkMode:      'Dark Mode aktivieren',
       switchToEn:    'Switch to English',
-      livesLabel:    'Leben',
+      dogsLabel:     'Hunde',
       errorsLabel:   'Fehler',
       levelLabel:    'Level',
       changeDifficulty: 'Schwierigkeit wechseln',
@@ -149,12 +149,12 @@ export const translations = {
         {
           icon: '🏅',
           heading: 'Kampagnen-Modus',
-          body: '50 Level warten: 1–8 <b>Einfach</b>, 9–20 <b>Mittel</b>, 21–30 <b>Schwer</b>, 31–40 <b>Experte</b>, 41–50 <b>Meister</b>.<br/>Leben und Knochen übertragen sich zwischen den Levels – jeder Fehler zählt!<br/>Nach Level 50 startet ein <b>Endlos-Modus</b> mit zufälliger Schwierigkeit.',
+          body: '50 Level warten: 1–8 <b>Einfach</b>, 9–20 <b>Mittel</b>, 21–30 <b>Schwer</b>, 31–40 <b>Experte</b>, 41–50 <b>Meister</b>.<br/>Knochen übertragen sich zwischen den Levels – jeder Fehler zählt!<br/>Nach Level 50 startet ein <b>Endlos-Modus</b> mit zufälliger Schwierigkeit.',
         },
         {
           icon: '🦴',
           heading: 'Belohnung & Strafe',
-          body: 'Alle <b>5 abgeschlossene Level</b> gibt es einen Knochen zurück (bei vollem Knochenwert ein Extra-Leben).<br/><b>Lösung anschauen</b> kostet einen Knochen oder ein Leben.',
+          body: 'Alle <b>5 abgeschlossene Level</b> gibt es einen Knochen zurück (max. 3).<br/><b>Lösung anschauen</b> kostet einen Knochen.',
         },
         {
           icon: '🗺️',
@@ -200,7 +200,7 @@ export const translations = {
     },
     gameOver: {
       title:    '💀 Game Over',
-      subtitle: 'Alle Leben verbraucht!',
+      subtitle: 'Alle Knochen verbraucht!',
       restart:  '🔄 Neu starten',
       newPuzzle:'🎲 Neues Puzzle',
     },
@@ -227,7 +227,7 @@ export const translations = {
     },
     header: {
       timerLabel:    'Time played',
-      livesLabel:    'Lives',
+      dogsLabel:     'Dogs',
       errorsLabel:   'Errors',
       levelLabel:    'Level',
       lightMode:     'Switch to light mode',
@@ -361,12 +361,12 @@ export const translations = {
         {
           icon: '🏅',
           heading: 'Campaign mode',
-          body: '50 levels await: 1–8 <b>Easy</b>, 9–20 <b>Medium</b>, 21–30 <b>Hard</b>, 31–40 <b>Expert</b>, 41–50 <b>Master</b>.<br/>Lives and bones carry over between levels – every mistake counts!<br/>After level 50, an <b>endless mode</b> begins with random difficulty.',
+          body: '50 levels await: 1–8 <b>Easy</b>, 9–20 <b>Medium</b>, 21–30 <b>Hard</b>, 31–40 <b>Expert</b>, 41–50 <b>Master</b>.<br/>Bones carry over between levels – every mistake counts!<br/>After level 50, an <b>endless mode</b> begins with random difficulty.',
         },
         {
           icon: '🦴',
           heading: 'Rewards & penalties',
-          body: 'Every <b>5 completed levels</b> you earn a bone back (a full bone bar earns an extra life).<br/><b>Viewing the solution</b> costs one bone or a life.',
+          body: 'Every <b>5 completed levels</b> you earn a bone back (max. 3).<br/><b>Viewing the solution</b> costs one bone.',
         },
         {
           icon: '🗺️',
@@ -412,7 +412,7 @@ export const translations = {
     },
     gameOver: {
       title:    '💀 Game Over',
-      subtitle: 'All lives lost!',
+      subtitle: 'All bones used up!',
       restart:  '🔄 Restart',
       newPuzzle:'🎲 New Puzzle',
     },

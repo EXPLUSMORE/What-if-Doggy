@@ -116,6 +116,9 @@ export default function App() {
     canRedo,
   } = useGame(initialPuzzle);
 
+  // Hunde-Fortschritt: alle gesetzten Hunde (ohne What-if)
+  const dogsPlaced = state.grid.flat().filter(c => c.state === 'dog' && c.source !== 'whatif').length;
+
   // ── Web Worker für Puzzle-Generierung ──────────────────────
   // Läuft komplett außerhalb des Main-Threads → keine UI-Freezes.
   const workerRef = useRef<Worker | null>(null);
@@ -272,7 +275,8 @@ export default function App() {
       <Header
         difficulty={state.puzzle.difficulty}
         onSelectDifficulty={handleSelectDifficulty}
-        lives={state.lives}
+        dogsPlaced={dogsPlaced}
+        puzzleSize={state.puzzle.size}
         bones={state.bones}
         campaignMode={state.campaignMode}
         level={state.level}

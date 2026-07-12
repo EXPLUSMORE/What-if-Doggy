@@ -46,7 +46,7 @@ function nextStateDouble(current: CellState): CellState {
   return 'dog';
 }
 
-export const MAX_LIVES = 3;
+export const MAX_LIVES = 1;  // Nur noch Knochen zählen – kein Lebens-System mehr
 export const MAX_BONES = 3;
 
 function applyError(lives: number, bones: number): { lives: number; bones: number; gameOver: boolean } {
@@ -366,8 +366,8 @@ function gameReducer(state: GameState, action: Action): GameState {
       let lives = resetLives ? MAX_LIVES : state.lives;
       let bones = resetLives ? MAX_BONES : state.bones;
       if (bonusReward && !resetLives) {
-        if (bones < MAX_BONES) { bones = bones + 1; }
-        else if (lives < MAX_LIVES) { lives = lives + 1; bones = MAX_BONES; }
+        // Bonus: +1 Knochen (max MAX_BONES) – kein Extra-Leben mehr
+        bones = Math.min(MAX_BONES, bones + 1);
       }
       const next: GameState = {
         ...state,
