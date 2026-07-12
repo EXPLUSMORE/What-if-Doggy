@@ -138,8 +138,10 @@ function pruneToUnique(
   const map = initialMap.map(r => [...r]);
 
   // KRITISCH: maxIter niedrig halten → misslungene Versuche enden schnell.
-  // Erfolgreiche Versuche konvergieren typisch in 30-150 Iterationen.
-  const maxIter = size <= 8 ? 200 : size <= 10 ? 250 : 350;
+  // Erfolgreiche Versuche konvergieren typisch in 30-165 Iterationen.
+  // Für size ≥ 11 bewusst 250 statt 350: jeder Fehlschlag kostet ~875 ms
+  // statt ~1250 ms; das hält die Gesamtzeit verlässlich unter 5 Sekunden.
+  const maxIter = size <= 8 ? 200 : size <= 10 ? 250 : 250;
 
   for (let iter = 0; iter < maxIter; iter++) {
     const result = solveForGenerator(size, map as ReadonlyArray<ReadonlyArray<number>>);
@@ -208,8 +210,8 @@ const SIZE_BY_DIFFICULTY: Record<Difficulty, number> = {
   easy:   6,
   medium: 8,
   hard:   10,
-  expert: 12,
-  master: 13,
+  expert: 11,
+  master: 12,
 };
 
 export function generatePuzzle(options: GeneratorOptions = {}): Puzzle {

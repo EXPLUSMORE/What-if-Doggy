@@ -112,7 +112,7 @@ export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: Level
           {Array.from({ length: MAX_CAMPAIGN_LEVEL }, (_, i) => {
             const level = i + 1;
             const diff = getLevelDifficulty(level);
-            const size = level <= 8 ? 6 : level <= 20 ? 8 : level <= 30 ? 10 : level <= 40 ? 12 : 13;
+            const size = level <= 8 ? 6 : level <= 20 ? 8 : level <= 30 ? 10 : level <= 40 ? 11 : 12;
             const puzzle = puzzles[i];
             const isCurrent = level === currentLevel;
             return (
