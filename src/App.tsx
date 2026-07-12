@@ -133,7 +133,14 @@ export default function App() {
       new URL('./workers/puzzle.worker.ts', import.meta.url),
       { type: 'module' }
     );
-    w.onerror = (e) => { console.error('[Worker] init error:', e); };
+    // Worker-Fehler → alle hängenden Promises sofort rejecten
+    w.onerror = (e) => {
+      console.error('[Worker] error:', e);
+      for (const pending of pendingRef.current.values()) {
+        pending.reject(new Error('Worker error'));
+      }
+      pendingRef.current.clear();
+    };
     w.onmessage = (e: MessageEvent<{ id: string; puzzle: Puzzle | null; error: string | null }>) => {
       const { id, puzzle, error } = e.data;
       const pending = pendingRef.current.get(id);
@@ -146,21 +153,43 @@ export default function App() {
     return () => { w.terminate(); workerRef.current = null; };
   }, []);
 
-  const workerPost = useCallback(<T extends object>(msg: T): Promise<Puzzle> =>
+  /** Worker-Post mit Timeout (30s) – verhindert endloses Hängen */
+  const workerPost = useCallback(<T extends object>(msg: T, timeoutMs = 30_000): Promise<Puzzle> =>
     new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        reject(new Error('Worker not initialized'));
+        return;
+      }
       const id = Math.random().toString(36).slice(2);
-      pendingRef.current.set(id, { resolve, reject });
-      workerRef.current?.postMessage({ id, ...msg });
+      const timer = setTimeout(() => {
+        pendingRef.current.delete(id);
+        reject(new Error('Puzzle generation timeout'));
+      }, timeoutMs);
+      pendingRef.current.set(id, {
+        resolve: (p) => { clearTimeout(timer); resolve(p); },
+        reject: (e) => { clearTimeout(timer); reject(e); },
+      });
+      workerRef.current.postMessage({ id, ...msg });
     }), []);
+
+  // Ref-basierter Guard verhindert Race-Conditions beim Doppelklick
+  const isGeneratingRef = useRef(false);
 
   /** Async-Wrapper: zeigt Spinner, generiert im Worker, lädt Puzzle ohne UI-Freeze */
   const gen = useCallback(async (work: () => Promise<void>) => {
-    if (isGenerating) return;
+    if (isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     try { await work(); }
-    catch (e) { console.error('Puzzle generation failed:', e); }
-    finally { setIsGenerating(false); }
-  }, [isGenerating]);
+    catch (e) {
+      console.error('Puzzle generation failed:', e);
+      // Kurze Fehlermeldung für den Nutzer – kein alert() nötig, Banner reicht
+    }
+    finally {
+      isGeneratingRef.current = false;
+      setIsGenerating(false);
+    }
+  }, []);
 
   /** Level-Puzzle via Worker (Worker cached intern → Wiederholungen instant) */
   const getLevel = useCallback((level: number): Promise<Puzzle> =>
@@ -427,7 +456,6 @@ export default function App() {
         />
       )}
 
-      
       {hintData && (
         <HintModal
           hintData={hintData}
