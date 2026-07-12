@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLang } from '../../i18n/LanguageContext';
-import { MAX_CAMPAIGN_LEVEL, generateLevelPuzzle } from '../../engine/generator';
+import { MAX_CAMPAIGN_LEVEL } from '../../engine/generator';
 import type { Puzzle, Difficulty } from '../../types';
 
 interface LevelSelectModalProps {
   currentLevel: number;
   onSelectLevel: (level: number) => void;
   onClose: () => void;
+  /** Async puzzle generator – runs in Web Worker, never blocks main thread */
+  onGenerateLevel: (level: number) => Promise<Puzzle>;
 }
 
 function getLevelDifficulty(level: number): Difficulty {
@@ -52,36 +54,31 @@ const DIFF_DOT: Record<Difficulty, string> = {
   expert: '#8b5cf6', master: '#0ea5e9',
 };
 
-export function LevelSelectModal({ currentLevel, onSelectLevel, onClose }: LevelSelectModalProps) {
+export function LevelSelectModal({ currentLevel, onSelectLevel, onClose, onGenerateLevel }: LevelSelectModalProps) {
   const { t } = useLang();
   const [puzzles, setPuzzles] = useState<(Puzzle | null)[]>(
     () => Array(MAX_CAMPAIGN_LEVEL).fill(null)
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    // Delay je nach Schwierigkeit: Cache-Hits (Level 1-30) sind sofort,
-    // Expert/Master brauchen Luft damit die UI nicht einfriert.
-    const delayFor = (level: number) =>
-      level <= 20 ? 0 : level <= 30 ? 20 : level <= 40 ? 120 : 250;
+  const loadLevel = useCallback((level: number) => {
+    onGenerateLevel(level)
+      .then(puzzle => setPuzzles(prev => {
+        const a = [...prev];
+        a[level - 1] = puzzle;
+        return a;
+      }))
+      .catch(() => { /* ignore – skeleton stays */ });
+  }, [onGenerateLevel]);
 
-    // Sequenziell: jedes Level wartet auf das vorherige
-    let i = 0;
-    const launchNext = () => {
-      if (cancelled || i >= MAX_CAMPAIGN_LEVEL) return;
-      const idx = i++;
-      const level = idx + 1;
-      setTimeout(() => {
-        if (cancelled) return;
-        const puzzle = generateLevelPuzzle(level);
-        setPuzzles(prev => { const a = [...prev]; a[idx] = puzzle; return a; });
-        launchNext();
-      }, delayFor(level));
-    };
-    // Erste 3 Level sofort parallel starten (sind gecacht)
-    for (let b = 0; b < 3 && i < MAX_CAMPAIGN_LEVEL; b++) launchNext();
-    return () => { cancelled = true; };
-  }, []);
+  useEffect(() => {
+    // Fire all requests to the Worker at once.
+    // Worker is single-threaded → processes sequentially;
+    // thumbnails appear progressively as responses arrive.
+    // Main thread is NEVER blocked.
+    for (let lvl = 1; lvl <= MAX_CAMPAIGN_LEVEL; lvl++) {
+      loadLevel(lvl);
+    }
+  }, [loadLevel]);
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal

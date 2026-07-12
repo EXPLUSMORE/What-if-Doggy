@@ -7,11 +7,9 @@ import { useGame } from './hooks/useGame';
 import { useTimer } from './hooks/useTimer';
 import { useMusic } from './hooks/useMusic';
 import { useBoardSize } from './hooks/useBoardSize';
-import { generatePuzzle, prefetchLevelPuzzles, getCachedLevelPuzzle } from './engine/generator';
+import { generatePuzzle } from './engine/generator';
 import type { Puzzle } from './types';
 
-// Kampagnen-Puzzles sofort im Hintergrund vorgenerieren
-prefetchLevelPuzzles();
 import { Header } from './components/Header/Header';
 import { GameBoard } from './components/Board/GameBoard';
 import { TopControls, BottomControls } from './components/Controls/Controls';
@@ -63,7 +61,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { t } = useLang();
 
-  const [initialPuzzle] = useState(() => generatePuzzle({ difficulty: 'medium' }));
+  const [initialPuzzle] = useState(() => generatePuzzle({ difficulty: 'easy' }));
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -128,6 +126,7 @@ export default function App() {
       new URL('./workers/puzzle.worker.ts', import.meta.url),
       { type: 'module' }
     );
+    w.onerror = (e) => { console.error('[Worker] init error:', e); };
     w.onmessage = (e: MessageEvent<{ id: string; puzzle: Puzzle | null; error: string | null }>) => {
       const { id, puzzle, error } = e.data;
       const pending = pendingRef.current.get(id);
@@ -156,12 +155,9 @@ export default function App() {
     finally { setIsGenerating(false); }
   }, [isGenerating]);
 
-  /** Level-Puzzle: Cache-Hit → synchron; sonst Worker */
-  const getLevel = useCallback(async (level: number): Promise<Puzzle> => {
-    const cached = getCachedLevelPuzzle(level);
-    if (cached) return cached;
-    return workerPost({ type: 'level', level });
-  }, [workerPost]);
+  /** Level-Puzzle via Worker (Worker cached intern → Wiederholungen instant) */
+  const getLevel = useCallback((level: number): Promise<Puzzle> =>
+    workerPost({ type: 'level', level }), [workerPost]);
 
   // Dynamische Zellgröße: passt --cell-size an Viewport + Puzzle-Größe an
   useBoardSize(state.puzzle.size);
@@ -372,6 +368,7 @@ export default function App() {
           currentLevel={state.level}
           onSelectLevel={handleSelectLevel}
           onClose={() => setShowLevelSelect(false)}
+          onGenerateLevel={getLevel}
         />
       )}
 
