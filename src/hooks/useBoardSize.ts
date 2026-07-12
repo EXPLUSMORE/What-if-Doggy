@@ -47,7 +47,7 @@ export function useBoardSize(puzzleSize: number): void {
       const fromW = availW / n;
       const fromH = availH / n;
       // Minimale Zellgröße: für große Gitter (12×12, 15×15) erlauben wir kleinere Zellen
-      const cellMin = n <= 10 ? 22 : n <= 12 ? 18 : 14;
+      const cellMin = n <= 10 ? 22 : n <= 12 ? 18 : 16;
       const cell  = Math.min(CELL_MAX, Math.max(cellMin, Math.floor(Math.min(fromW, fromH))));
 
       const root = document.documentElement;

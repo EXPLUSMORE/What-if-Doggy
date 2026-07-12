@@ -389,6 +389,45 @@ body {
 .difficulty--expert { background: #ede9fe; color: #5b21b6; }
 .difficulty--master { background: #e0f2fe; color: #0c4a6e; }
 
+/* Difficulty Dropdown Wrapper */
+.header__diff-wrap {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 99px;
+  padding: 0 .1rem;
+  font-size: .78rem;
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition);
+}
+.header__diff-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  padding: .28rem .55rem .28rem .45rem;
+  /* custom arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='currentColor'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .45rem center;
+  background-size: 8px 5px;
+  padding-right: 1.3rem;
+}
+.header__diff-select:disabled {
+  cursor: default;
+  opacity: .75;
+}
+.header__diff-select option {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
 [data-theme="dark"] .difficulty--easy   { background: #14532d; color: #86efac; }
 [data-theme="dark"] .difficulty--medium { background: #713f12; color: #fde68a; }
 [data-theme="dark"] .difficulty--hard   { background: #7f1d1d; color: #fca5a5; }

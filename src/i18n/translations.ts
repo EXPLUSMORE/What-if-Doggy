@@ -27,14 +27,14 @@ export const translations = {
         medium: 'Mittel (8x8)',
         hard:   'Schwer (10x10)',
         expert: 'Experte (12x12)',
-        master: 'Meister (15x15)',
+        master: 'Meister (13x13)',
       },
       difficultyBtnShort: {
         easy:   'E(6x6)',
         medium: 'M(8x8)',
         hard:   'H(10x10)',
         expert: 'X(12x12)',
-        master: 'M(15x15)',
+        master: 'M(13x13)',
       },
     },
     controls: {
@@ -108,7 +108,7 @@ export const translations = {
         { label: 'Mittel',   desc: '8x8 Gitter - die klassische Herausforderung' },
         { label: 'Schwer',   desc: '10x10 Gitter - fuer Profis' },
         { label: 'Experte',  desc: '12x12 Gitter - fuer Kenner' },
-        { label: 'Meister',  desc: '15x15 Gitter - fuer absolute Profis' },
+        { label: 'Meister',  desc: '13x13 Gitter - fuer absolute Profis' },
       ],
     },
     rules: {
@@ -239,14 +239,14 @@ export const translations = {
         medium: 'Medium (8x8)',
         hard:   'Hard (10x10)',
         expert: 'Expert (12x12)',
-        master: 'Master (15x15)',
+        master: 'Master (13x13)',
       },
       difficultyBtnShort: {
         easy:   'E(6x6)',
         medium: 'M(8x8)',
         hard:   'H(10x10)',
         expert: 'X(12x12)',
-        master: 'M(15x15)',
+        master: 'M(13x13)',
       },
     },
     controls: {
@@ -320,7 +320,7 @@ export const translations = {
         { label: 'Medium', desc: '8x8 grid - the classic challenge' },
         { label: 'Hard',   desc: '10x10 grid - for experts' },
         { label: 'Expert', desc: '12x12 grid - for connoisseurs' },
-        { label: 'Master', desc: '15x15 grid - for absolute pros' },
+        { label: 'Master', desc: '13x13 grid - for absolute pros' },
       ],
     },
     rules: {

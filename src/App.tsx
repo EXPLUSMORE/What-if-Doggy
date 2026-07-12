@@ -33,8 +33,6 @@ function getInitialDark(): boolean {
   return true;
 }
 
-const DIFFICULTY_CYCLE: Difficulty[] = ['easy', 'medium', 'hard', 'expert', 'master'];
-
 export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(getInitialDark);
   const [countdownEnabled, setCountdownEnabled] = useState<boolean>(() => {
@@ -164,11 +162,8 @@ export default function App() {
     trilogyOverride: musicTrilogy,
   });
 
-  const handleChangeDifficulty = () =>
-    generate(() => {
-      const idx = DIFFICULTY_CYCLE.indexOf(state.puzzle.difficulty);
-      newPuzzle(DIFFICULTY_CYCLE[(idx + 1) % DIFFICULTY_CYCLE.length]);
-    });
+  const handleSelectDifficulty = (difficulty: Difficulty) =>
+    generate(() => newPuzzle(difficulty));
 
   const handleNewPuzzle = (difficulty: Difficulty) =>
     generate(() => newPuzzle(difficulty));
@@ -222,7 +217,7 @@ export default function App() {
     <>
       <Header
         difficulty={state.puzzle.difficulty}
-        onChangeDifficulty={handleChangeDifficulty}
+        onSelectDifficulty={handleSelectDifficulty}
         lives={state.lives}
         bones={state.bones}
         campaignMode={state.campaignMode}

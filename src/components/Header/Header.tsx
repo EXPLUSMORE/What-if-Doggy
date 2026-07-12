@@ -1,6 +1,5 @@
 // ============================================================
 // Header – Titel + Meta-Zeile
-// Im Kampagnen-Modus: Level-Badge klickbar (beendet Kampagne) + Difficulty-Badge
 // ============================================================
 
 import { useLang } from '../../i18n/LanguageContext';
@@ -8,9 +7,11 @@ import { MAX_LIVES, MAX_BONES } from '../../hooks/useGame';
 import { MAX_CAMPAIGN_LEVEL } from '../../engine/generator';
 import type { Difficulty } from '../../types';
 
+const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert', 'master'];
+
 interface HeaderProps {
   difficulty: Difficulty;
-  onChangeDifficulty: () => void;
+  onSelectDifficulty: (d: Difficulty) => void;
   onOpenSettings: () => void;
   lives: number;
   bones: number;
@@ -23,7 +24,7 @@ interface HeaderProps {
 
 export function Header({
   difficulty,
-  onChangeDifficulty,
+  onSelectDifficulty,
   lives,
   bones,
   campaignMode = false,
@@ -46,9 +47,8 @@ export function Header({
         </h1>
       </div>
 
-      {/* Zeile 2: Lives | Errors | sep | [Level-Badge +] Difficulty | sep | Lang | Dark */}
+      {/* Zeile 2: Lives | Bones | [Level] | sep | Difficulty Dropdown | sep | Settings */}
       <div className="header__meta">
-
 
         {/* Leben-Pill */}
         <div className="header__stat-pill" aria-label={`${lives} ${t.header.livesLabel}`}>
@@ -82,7 +82,7 @@ export function Header({
           <span className="header__stat-label">{t.header.errorsLabel}</span>
         </div>
 
-        {/* Level-Pill – nur im Kampagnenmodus, gleiche Struktur wie Leben/Knochen */}
+        {/* Level-Pill – nur im Kampagnenmodus */}
         {campaignMode && level > 0 && (() => {
           const mins = Math.floor(countdownSeconds / 60);
           const secs = countdownSeconds % 60;
@@ -113,16 +113,23 @@ export function Header({
 
         <span className="header__meta-sep" aria-hidden="true" />
 
-        {/* Difficulty-Button: im Kampagnen-Modus zeigt er den Level-Schwierigkeitsgrad (nicht klickbar) */}
-        <button
-          className={`btn header__diff-btn difficulty--${difficulty}`}
-          onClick={!campaignMode ? onChangeDifficulty : undefined}
-          title={!campaignMode ? t.header.changeDifficulty : undefined}
-          style={campaignMode ? { cursor: 'default', opacity: 0.8 } : undefined}
-        >
-          <span className="diff-label--full">{t.header.difficultyBtn[difficulty]}</span>
-          <span className="diff-label--short">{t.header.difficultyBtnShort[difficulty]}</span>
-        </button>
+        {/* Difficulty Dropdown */}
+        <div className={`header__diff-wrap difficulty--${difficulty}`}>
+          <select
+            className="header__diff-select"
+            value={difficulty}
+            disabled={campaignMode}
+            title={t.header.changeDifficulty}
+            aria-label={t.header.changeDifficulty}
+            onChange={e => onSelectDifficulty(e.target.value as Difficulty)}
+          >
+            {DIFFICULTIES.map(d => (
+              <option key={d} value={d}>
+                {t.header.difficultyBtn[d]}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <span className="header__meta-sep" aria-hidden="true" />
 

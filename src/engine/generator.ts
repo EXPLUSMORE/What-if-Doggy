@@ -200,7 +200,7 @@ const SIZE_BY_DIFFICULTY: Record<Difficulty, number> = {
   medium: 8,
   hard:   10,
   expert: 12,
-  master: 15,
+  master: 13,
 };
 
 export function generatePuzzle(options: GeneratorOptions = {}): Puzzle {
